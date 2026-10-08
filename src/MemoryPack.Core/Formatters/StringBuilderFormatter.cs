@@ -5,10 +5,8 @@ using System.Text;
 
 namespace MemoryPack.Formatters;
 
-[Preserve]
 public sealed class StringBuilderFormatter : MemoryPackFormatter<StringBuilder>
 {
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref StringBuilder? value)
     {
         if (value == null)
@@ -41,7 +39,6 @@ public sealed class StringBuilderFormatter : MemoryPackFormatter<StringBuilder>
 #endif
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref StringBuilder? value)
     {
         if (!reader.TryReadCollectionHeader(out var length))

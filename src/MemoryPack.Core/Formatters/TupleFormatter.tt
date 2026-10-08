@@ -27,13 +27,11 @@ internal static class TupleFormatterTypes
 }
 
 <# for (var i = 1; i <= 8; i++ ) { #>
-[Preserve]
 public sealed class TupleFormatter<<#= CreateT(i) #>> : MemoryPackFormatter<Tuple<<#= CreateTNull(i) #>>>
 <# if (i == 8) { #>
     where TRest : notnull
 <# } #>
 {
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref Tuple<<#= CreateTNull(i) #>>? value)
     {
         if (value == null)
@@ -48,7 +46,6 @@ public sealed class TupleFormatter<<#= CreateT(i) #>> : MemoryPackFormatter<Tupl
 <# } #>
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref Tuple<<#= CreateTNull(i) #>>? value)
     {
         if (!reader.TryReadObjectHeader(out var count))
@@ -70,13 +67,11 @@ public sealed class TupleFormatter<<#= CreateT(i) #>> : MemoryPackFormatter<Tupl
 <# } #>
 
 <# for (var i = 1; i <= 8; i++ ) { #>
-[Preserve]
 public sealed class ValueTupleFormatter<<#= CreateT(i) #>> : MemoryPackFormatter<ValueTuple<<#= CreateTNull(i) #>>>
 <# if (i == 8) { #>
     where TRest : struct
 <# } #>
 {
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ValueTuple<<#= CreateTNull(i) #>> value)
     {
         if (!System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<ValueTuple<<#= CreateTNull(i) #>>>())
@@ -90,7 +85,6 @@ public sealed class ValueTupleFormatter<<#= CreateT(i) #>> : MemoryPackFormatter
 <# } #>
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref ValueTuple<<#= CreateTNull(i) #>> value)
     {
         if (!System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<ValueTuple<<#= CreateTNull(i) #>>>())

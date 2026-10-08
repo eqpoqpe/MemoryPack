@@ -8,7 +8,6 @@ namespace MemoryPack.Compression;
 
 // serialize as (uncompressedLength, compressedLength, values...)
 
-[Preserve]
 public sealed class BrotliFormatter : MemoryPackFormatter<byte[]>
 {
     internal const int DefaultDecompssionSizeLimit = 1024 * 1024 * 128; // 128MB
@@ -42,7 +41,6 @@ public sealed class BrotliFormatter : MemoryPackFormatter<byte[]>
         this.decompressionSizeLimit = decompressionSizeLimit;
     }
 
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref byte[]? value)
     {
         if (value == null)
@@ -84,7 +82,6 @@ public sealed class BrotliFormatter : MemoryPackFormatter<byte[]>
         writer.Advance(bytesWritten + 8);
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref byte[]? value)
     {
         var uncompressedLength = reader.ReadUnmanaged<int>();
@@ -130,7 +127,6 @@ public sealed class BrotliFormatter : MemoryPackFormatter<byte[]>
 }
 
 
-[Preserve]
 public sealed class BrotliFormatter<T> : MemoryPackFormatter<T>
 {
     internal const int DefaultDecompssionSizeLimit = 1024 * 1024 * 128; // 128MB
@@ -157,7 +153,6 @@ public sealed class BrotliFormatter<T> : MemoryPackFormatter<T>
         this.window = window;
     }
 
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref T? value)
     {
         var compressor = new BrotliCompressor(compressionLevel, window);
@@ -176,7 +171,6 @@ public sealed class BrotliFormatter<T> : MemoryPackFormatter<T>
         }
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref T? value)
     {
         using var decompressor = new BrotliDecompressor();

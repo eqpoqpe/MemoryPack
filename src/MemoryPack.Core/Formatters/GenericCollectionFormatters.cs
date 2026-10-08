@@ -3,11 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace MemoryPack.Formatters;
 
-[Preserve]
 public sealed class GenericCollectionFormatter<TCollection, TElement> : MemoryPackFormatter<TCollection?>
     where TCollection : ICollection<TElement?>, new()
 {
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref TCollection? value)
     {
         if (value == null)
@@ -26,7 +24,6 @@ public sealed class GenericCollectionFormatter<TCollection, TElement> : MemoryPa
         }
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref TCollection? value)
     {
         if (!reader.TryReadCollectionHeader(out var length))
@@ -49,14 +46,11 @@ public sealed class GenericCollectionFormatter<TCollection, TElement> : MemoryPa
     }
 }
 
-[Preserve]
 public abstract class GenericSetFormatterBase<TSet, TElement> : MemoryPackFormatter<TSet?>
     where TSet : ISet<TElement?>
 {
-    [Preserve]
     protected abstract TSet CreateSet();
 
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref TSet? value)
     {
         if (value == null)
@@ -75,7 +69,6 @@ public abstract class GenericSetFormatterBase<TSet, TElement> : MemoryPackFormat
         }
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref TSet? value)
     {
         if (!reader.TryReadCollectionHeader(out var length))
@@ -98,7 +91,6 @@ public abstract class GenericSetFormatterBase<TSet, TElement> : MemoryPackFormat
     }
 }
 
-[Preserve]
 public sealed class GenericSetFormatter<TSet, TElement> : GenericSetFormatterBase<TSet, TElement>
     where TSet : ISet<TElement?>, new()
 {
@@ -108,15 +100,12 @@ public sealed class GenericSetFormatter<TSet, TElement> : GenericSetFormatterBas
     }
 }
 
-[Preserve]
 public abstract class GenericDictionaryFormatterBase<TDictionary, TKey, TValue> : MemoryPackFormatter<TDictionary?>
     where TKey : notnull
     where TDictionary : IDictionary<TKey, TValue?>
 {
-    [Preserve]
     protected abstract TDictionary CreateDictionary();
 
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref TDictionary? value)
     {
         if (value == null)
@@ -135,7 +124,6 @@ public abstract class GenericDictionaryFormatterBase<TDictionary, TKey, TValue> 
         }
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref TDictionary? value)
     {
         if (!reader.TryReadCollectionHeader(out var length))
@@ -158,12 +146,10 @@ public abstract class GenericDictionaryFormatterBase<TDictionary, TKey, TValue> 
     }
 }
 
-[Preserve]
 public sealed class GenericDictionaryFormatter<TDictionary, TKey, TValue> : GenericDictionaryFormatterBase<TDictionary, TKey, TValue>
     where TKey : notnull
     where TDictionary : IDictionary<TKey, TValue?>, new()
 {
-    [Preserve]
     protected override TDictionary CreateDictionary()
     {
         return new();

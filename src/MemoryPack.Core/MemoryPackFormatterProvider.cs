@@ -38,7 +38,7 @@ public static partial class MemoryPackFormatterProvider
     {
         // Initialize on startup
         RegisterWellKnownTypesFormatters();
-        // Extension for Unity or others
+        // Extension for additional formatters
         RegisterInitialFormatters();
     }
 
@@ -296,10 +296,8 @@ public static partial class MemoryPackFormatterProvider
         formatterType = TryCreateGenericFormatterType(type, CollectionFormatters);
         if (formatterType != null) goto CREATE;
 
-#if !UNITY_2021_2_OR_NEWER
         formatterType = TryCreateGenericFormatterType(type, ImmutableCollectionFormatters);
         if (formatterType != null) goto CREATE;
-#endif
 
 #if NET8_0_OR_GREATER
         formatterType = TryCreateGenericFormatterType(type, FrozenCollectionFormatters);

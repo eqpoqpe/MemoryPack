@@ -32,10 +32,8 @@ namespace MemoryPack
 
 namespace MemoryPack.Formatters
 {
-    [Preserve]
     public sealed class ImmutableArrayFormatter<T> : MemoryPackFormatter<ImmutableArray<T?>>
     {
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ImmutableArray<T?> value)
         {
             if (value.IsDefault)
@@ -48,7 +46,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref ImmutableArray<T?> value)
         {
             var array = reader.ReadArray<T?>();
@@ -75,16 +72,13 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     internal struct ImmutableArrayView<T>
     {
         public T[]? array;
     }
 
-    [Preserve]
     public sealed class ImmutableListFormatter<T> : MemoryPackFormatter<ImmutableList<T?>>
     {
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ImmutableList<T?>? value)
         {
             if (value == null)
@@ -102,7 +96,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref ImmutableList<T?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -138,10 +131,8 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     public sealed class ImmutableQueueFormatter<T> : MemoryPackFormatter<ImmutableQueue<T?>>
     {
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ImmutableQueue<T?>? value)
         {
             if (value == null)
@@ -178,7 +169,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref ImmutableQueue<T?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -230,10 +220,8 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     public sealed class ImmutableStackFormatter<T> : MemoryPackFormatter<ImmutableStack<T?>>
     {
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ImmutableStack<T?>? value)
         {
             if (value == null)
@@ -271,7 +259,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref ImmutableStack<T?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -323,7 +310,6 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     public sealed class ImmutableDictionaryFormatter<TKey, TValue> : MemoryPackFormatter<ImmutableDictionary<TKey, TValue?>?>
         where TKey : notnull
     {
@@ -342,7 +328,6 @@ namespace MemoryPack.Formatters
             this.valueEqualityComparer = valueEqualityComparer;
         }
 
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ImmutableDictionary<TKey, TValue?>? value)
         {
             if (value == null)
@@ -361,7 +346,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref ImmutableDictionary<TKey, TValue?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -394,7 +378,6 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     public sealed class ImmutableHashSetFormatter<T> : MemoryPackFormatter<ImmutableHashSet<T?>>
     {
         readonly IEqualityComparer<T?>? equalityComparer;
@@ -410,7 +393,6 @@ namespace MemoryPack.Formatters
             this.equalityComparer = equalityComparer;
         }
 
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ImmutableHashSet<T?>? value)
         {
             if (value == null)
@@ -428,7 +410,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref ImmutableHashSet<T?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -468,7 +449,6 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     public sealed class ImmutableSortedDictionaryFormatter<TKey, TValue> : MemoryPackFormatter<ImmutableSortedDictionary<TKey, TValue?>?>
         where TKey : notnull
     {
@@ -487,7 +467,6 @@ namespace MemoryPack.Formatters
             this.valueEqualityComparer = valueEqualityComparer;
         }
 
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ImmutableSortedDictionary<TKey, TValue?>? value)
         {
             if (value == null)
@@ -506,7 +485,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref ImmutableSortedDictionary<TKey, TValue?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -539,7 +517,6 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     public sealed class ImmutableSortedSetFormatter<T> : MemoryPackFormatter<ImmutableSortedSet<T?>>
     {
         readonly IComparer<T?>? keyComparer;
@@ -555,7 +532,6 @@ namespace MemoryPack.Formatters
             this.keyComparer = keyComparer;
         }
 
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ImmutableSortedSet<T?>? value)
         {
             if (value == null)
@@ -573,7 +549,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref ImmutableSortedSet<T?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -613,10 +588,8 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     public sealed class InterfaceImmutableListFormatter<T> : MemoryPackFormatter<IImmutableList<T?>>
     {
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref IImmutableList<T?>? value)
         {
             if (value == null)
@@ -634,7 +607,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref IImmutableList<T?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -670,10 +642,8 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     public sealed class InterfaceImmutableQueueFormatter<T> : MemoryPackFormatter<IImmutableQueue<T?>>
     {
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref IImmutableQueue<T?>? value)
         {
             if (value == null)
@@ -710,7 +680,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref IImmutableQueue<T?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -762,10 +731,8 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     public sealed class InterfaceImmutableStackFormatter<T> : MemoryPackFormatter<IImmutableStack<T?>>
     {
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref IImmutableStack<T?>? value)
         {
             if (value == null)
@@ -802,7 +769,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref IImmutableStack<T?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -854,7 +820,6 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     public sealed class InterfaceImmutableDictionaryFormatter<TKey, TValue> : MemoryPackFormatter<IImmutableDictionary<TKey, TValue?>?>
         where TKey : notnull
     {
@@ -873,7 +838,6 @@ namespace MemoryPack.Formatters
             this.valueEqualityComparer = valueEqualityComparer;
         }
 
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref IImmutableDictionary<TKey, TValue?>? value)
         {
             if (value == null)
@@ -892,7 +856,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref IImmutableDictionary<TKey, TValue?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -928,7 +891,6 @@ namespace MemoryPack.Formatters
         }
     }
 
-    [Preserve]
     public sealed class InterfaceImmutableSetFormatter<T> : MemoryPackFormatter<IImmutableSet<T?>>
     {
         readonly IEqualityComparer<T?>? equalityComparer;
@@ -944,7 +906,6 @@ namespace MemoryPack.Formatters
             this.equalityComparer = equalityComparer;
         }
 
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref IImmutableSet<T?>? value)
         {
             if (value == null)
@@ -962,7 +923,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref IImmutableSet<T?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))

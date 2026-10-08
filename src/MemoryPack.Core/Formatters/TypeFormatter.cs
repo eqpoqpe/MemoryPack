@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 
 namespace MemoryPack.Formatters;
 
-[Preserve]
 public sealed partial class TypeFormatter : MemoryPackFormatter<Type>
 {
     // Remove Version, Culture, PublicKeyToken from AssemblyQualifiedName.
@@ -22,7 +21,6 @@ public sealed partial class TypeFormatter : MemoryPackFormatter<Type>
 
 #endif
 
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref Type? value)
     {
         var full = value?.AssemblyQualifiedName;
@@ -36,7 +34,6 @@ public sealed partial class TypeFormatter : MemoryPackFormatter<Type>
         writer.WriteString(shortName);
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref Type? value)
     {
         var typeName = reader.ReadString();

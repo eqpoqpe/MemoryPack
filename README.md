@@ -4,7 +4,7 @@
 [![GitHub Actions](https://github.com/Cysharp/MemoryPack/workflows/Build-Debug/badge.svg)](https://github.com/Cysharp/MemoryPack/actions)
 [![Releases](https://img.shields.io/github/release/Cysharp/MemoryPack.svg)](https://github.com/Cysharp/MemoryPack/releases)
 
-Zero encoding extreme performance binary serializer for C# and Unity.
+Zero encoding extreme performance binary serializer for C#.
 
 ![image](https://user-images.githubusercontent.com/46207/200979655-63ed38ae-dad2-4ca0-bbb7-9e0aa98914af.png)
 
@@ -12,7 +12,7 @@ Zero encoding extreme performance binary serializer for C# and Unity.
 
 For standard objects, MemoryPack is x10 faster and x2 ~ x5 faster than other binary serializers. For struct array, MemoryPack is even more powerful, with speeds up to x50 ~ x200 greater than other serializers.
 
-MemoryPack is my 4th serializer, previously I've created well known serializers, ~~[ZeroFormatter](https://github.com/neuecc/ZeroFormatter)~~, ~~[Utf8Json](https://github.com/neuecc/Utf8Json)~~, [MessagePack for C#](https://github.com/neuecc/MessagePack-CSharp). The reason for MemoryPack's speed is due to its C#-specific, C#-optimized binary format and a well tuned implementation based on my past experience. It is also a completely new design utilizing .NET 7 and C# 11 and the Incremental Source Generator (.NET Standard 2.1 (.NET 5, 6) and there is also Unity support).
+MemoryPack is my 4th serializer, previously I've created well known serializers, ~~[ZeroFormatter](https://github.com/neuecc/ZeroFormatter)~~, ~~[Utf8Json](https://github.com/neuecc/Utf8Json)~~, [MessagePack for C#](https://github.com/neuecc/MessagePack-CSharp). The reason for MemoryPack's speed is due to its C#-specific, C#-optimized binary format and a well tuned implementation based on my past experience. It is also a completely new design utilizing .NET 7 and C# 11 and the Incremental Source Generator.
 
 Other serializers perform many encoding operations such as VarInt encoding, tag, string, etc. MemoryPack format uses a zero-encoding design that copies as much C# memory as possible. Zero-encoding is similar to FlatBuffers, but it doesn't need a special type, MemoryPack's serialization target is POCO.
 
@@ -27,17 +27,14 @@ Other than performance, MemoryPack has these features.
 * Circular reference serialization
 * PipeWriter/Reader based streaming serialization
 * TypeScript code generation and ASP.NET Core Formatter
-* Unity (2021.3) IL2CPP Support via .NET Source Generator
 
 Installation
 ---
-This library is distributed via NuGet. For best performance, recommend to use `.NET 7`. Minimum requirement is `.NET Standard 2.1`.
+This library is distributed via NuGet. Supported target frameworks are `net8.0`, `net10.0`, and `net11.0`. Building the repository requires a .NET 11 SDK.
 
 > PM> Install-Package [MemoryPack](https://www.nuget.org/packages/MemoryPack)
 
-And also a code editor requires Roslyn 4.3.1 support, for example Visual Studio 2022 version 17.3, .NET SDK 6.0.401. For details, see the [Roslyn Version Support](https://learn.microsoft.com/en-us/visualstudio/extensibility/roslyn-version-support) document.
-
-For Unity, the requirements and installation process are completely different. See the [Unity](#unity) section for details.
+The source generator targets `netstandard2.0` for Roslyn analyzer compatibility and uses Roslyn 4.4.0.
 
 Quick Start
 ---
@@ -401,7 +398,6 @@ switch (reData)
 
 If an interface and derived types are in different assemblies, you can use `MemoryPackUnionFormatterAttribute` instead. Formatters are generated the way that they are automatically registered via `ModuleInitializer` in C# 9.0 and above.
 
-> Note that `ModuleInitializer` is not supported in Unity, so the formatter must be manually registered. To register your union formatter invoke `{name of your union formatter}Initializer.RegisterFormatter()` manually in Startup. For example `UnionSampleFormatterInitializer.RegisterFormatter()`.
 
 ```csharp
 // AssemblyA
@@ -954,35 +950,35 @@ public partial class Sample
 
 Serialize external types
 ---
-If you want to serialize external types, you can make a custom formatter and register it to provider, see [Formatter/Provider API](#formatterprovider-api) for details. However, creating a custom formatter is difficult. Therefore, we recommend making a wrapper type. For example, if you want to serialize an external type called `AnimationCurve`.
+If you want to serialize external types, you can make a custom formatter and register it to provider, see [Formatter/Provider API](#formatterprovider-api) for details. However, creating a custom formatter is difficult. Therefore, we recommend making a wrapper type. For example, if you want to serialize an external type called `ExternalCurve`.
 
 ```csharp
-// Keyframe: (float time, float inTangent, float outTangent, int tangentMode, int weightedMode, float inWeight, float outWeight)
+// CurveKey: (float time, float inTangent, float outTangent, int tangentMode, int weightedMode, float inWeight, float outWeight)
 [MemoryPackable]
-public readonly partial struct SerializableAnimationCurve
+public readonly partial struct SerializableExternalCurve
 {
     [MemoryPackIgnore]
-    public readonly AnimationCurve AnimationCurve;
+    public readonly ExternalCurve ExternalCurve;
 
     [MemoryPackInclude]
-    WrapMode preWrapMode => AnimationCurve.preWrapMode;
+    CurveWrapMode preWrapMode => ExternalCurve.preWrapMode;
     [MemoryPackInclude]
-    WrapMode postWrapMode => AnimationCurve.postWrapMode;
+    CurveWrapMode postWrapMode => ExternalCurve.postWrapMode;
     [MemoryPackInclude]
-    Keyframe[] keys => AnimationCurve.keys;
+    CurveKey[] keys => ExternalCurve.keys;
 
     [MemoryPackConstructor]
-    SerializableAnimationCurve(WrapMode preWrapMode, WrapMode postWrapMode, Keyframe[] keys)
+    SerializableExternalCurve(CurveWrapMode preWrapMode, CurveWrapMode postWrapMode, CurveKey[] keys)
     {
-        var curve = new AnimationCurve(keys);
+        var curve = new ExternalCurve(keys);
         curve.preWrapMode = preWrapMode;
         curve.postWrapMode = postWrapMode;
-        this.AnimationCurve = curve;
+        this.ExternalCurve = curve;
     }
 
-    public SerializableAnimationCurve(AnimationCurve animationCurve)
+    public SerializableExternalCurve(ExternalCurve externalCurve)
     {
-        this.AnimationCurve = animationCurve;
+        this.ExternalCurve = externalCurve;
     }
 }
 ```
@@ -992,10 +988,9 @@ The type to wrap is public, but excluded from serialization (`MemoryPackIgnore`)
 As it is, it must be wrapped every time, which is inconvenient. And also strcut wrapper can not represents null. So let's create a custom formatter.
 
 ```csharp
-public class AnimationCurveFormatter : MemoryPackFormatter<AnimationCurve>
+public class ExternalCurveFormatter : MemoryPackFormatter<ExternalCurve>
 {
-    // Unity does not support scoped and TBufferWriter so change signature to `Serialize(ref MemoryPackWriter writer, ref AnimationCurve value)`
-    public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref AnimationCurve? value)
+    public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ExternalCurve? value)
     {
         if (value == null)
         {
@@ -1003,10 +998,10 @@ public class AnimationCurveFormatter : MemoryPackFormatter<AnimationCurve>
             return;
         }
 
-        writer.WritePackable(new SerializableAnimationCurve(value));
+        writer.WritePackable(new SerializableExternalCurve(value));
     }
 
-    public override void Deserialize(ref MemoryPackReader reader, scoped ref AnimationCurve? value)
+    public override void Deserialize(ref MemoryPackReader reader, scoped ref ExternalCurve? value)
     {
         if (reader.PeekIsNull())
         {
@@ -1015,8 +1010,8 @@ public class AnimationCurveFormatter : MemoryPackFormatter<AnimationCurve>
             return;
         }
         
-        var wrapped = reader.ReadPackable<SerializableAnimationCurve>();
-        value = wrapped.AnimationCurve;
+        var wrapped = reader.ReadPackable<SerializableExternalCurve>();
+        value = wrapped.ExternalCurve;
     }
 }
 ```
@@ -1024,9 +1019,8 @@ public class AnimationCurveFormatter : MemoryPackFormatter<AnimationCurve>
 Finally, register the formatter in startup.
 
 ```csharp
-MemoryPackFormatterProvider.Register<AnimationCurve>(new AnimationCurveFormatter());
+MemoryPackFormatterProvider.Register<ExternalCurve>(new ExternalCurveFormatter());
 ```
-> Note: Unity's AnimationCurve can serializable by default so does not needs this custom formatter for AnimationCurve
 
 Packages
 ---
@@ -1037,9 +1031,8 @@ MemoryPack has these packages.
 * MemoryPack.Generator
 * MemoryPack.Streaming
 * MemoryPack.AspNetCoreMvcFormatter
-* MemoryPack.UnityShims
 
-`MemoryPack` is the main library, it provides full support for high performance serialization and deserialization of binary objects. It depends on `MemoryPack.Core` for the core base libraries and `MemoryPack.Generator` for code generation. `MemoryPack.Streaming` adds additional extensions for [Streaming Serialization](#streaming-serialization).  `MemoryPack.AspNetCoreMvcFormatter` adds input/output formatters for ASP.NET Core. `MemoryPack.UnityShims` adds Unity shim types and formatters for share type between .NET and Unity.
+`MemoryPack` is the main library, it provides full support for high performance serialization and deserialization of binary objects. It depends on `MemoryPack.Core` for the core base libraries and `MemoryPack.Generator` for code generation. `MemoryPack.Streaming` adds additional extensions for [Streaming Serialization](#streaming-serialization).  `MemoryPack.AspNetCoreMvcFormatter` adds input/output formatters for ASP.NET Core.
 
 TypeScript and ASP.NET Core Formatter
 ---
@@ -1313,79 +1306,21 @@ using (var state = MemoryPackReaderOptionalStatePool.Rent(MemoryPackSerializerOp
 
 Target framework dependency
 ---
-MemoryPack provides `netstandard2.1` and `net7.0` but both are not compatible. For example, MemoryPackable types under `netstandard2.1` project and use it from `net7.0` project, throws runtime exception like this
-
-> Unhandled exception. System.TypeLoadException: Virtual static method '*' is not implemented on type '*' from assembly '*'.
-
-Since net7.0 uses static abstract members (`Virtual static method`), that does not support netstandard2.1, this behavior is a specification.
-
-.NET 7 project shouldn't use the netstandard 2.1 dll. In other words, if the Application is a .NET 7 Project, all the dependencies that use MemoryPack must support .NET 7. So if a library developer has a dependency on MemoryPack, you need to configure dual target framework.
+Runtime packages target `net8.0;net10.0;net11.0`. Libraries that depend on MemoryPack must target .NET 8 or later.
 
 ```xml
-<TargetFrameworks>netstandard2.1;net7.0</TargetFrameworks>
+<TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
 ```
+
+Package versions for the repository are managed centrally in `Directory.Packages.props`.
 
 RPC
 ---
 [Cysharp/MagicOnion](https://github.com/Cysharp/MagicOnion) is a code-first grpc-dotnet framework using MessagePack instead of protobuf. MagicOnion now supports MemoryPack as a serialization layer via `MagicOnion.Serialization.MemoryPack` package(preview). See details: [MagicOnion#MemoryPack support](https://github.com/Cysharp/MagicOnion#memorypack-support)
 
-Unity
----
-
-Minimum supported Unity version is `2022.3.12f1`.
-
-The `MemoryPack` core package is provided by nuget. It is also available in Unity. If you want to get Unity built-in type support, we additionally provide MemoryPack.Unity extension.
-
-1. Install `MemoryPack` from NuGet using [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity)
-
-* Open Window from NuGet -> Manage NuGet Packages, Search "MemoryPack" and Press Install.
-![screenshot](https://github.com/Cysharp/MemoryPack/assets/727159/599ff1ed-6cca-4724-be67-3edddb5e62ee)
-
-* If you encount version conflicts error, please disable version validation in Player Settings(Edit -> Project Settings -> Player -> Scroll down and expand "Other Settings" than uncheck "Assembly Version Validation" under the "Configuration" section).
-
-2. Install the `MemoryPack.Unity` package by referencing the git URL
-
-* `https://github.com/Cysharp/MemoryPack.git?path=src/MemoryPack.Unity/Assets/MemoryPack.Unity`
-![screenshot](https://github.com/Cysharp/ZLogger/assets/46207/7325d266-05b4-47c9-b06a-a67a40368dd2)
-![screenshot](https://github.com/Cysharp/MemoryPack/assets/727159/9a4af1df-ce07-49d7-9420-922dfb139b55)
-
-
-MemoryPack uses the *.*.* release tag, so you can specify a version like #1.0.0. For example: `https://github.com/Cysharp/MemoryPack.git?path=src/MemoryPack.Unity/Assets/MemoryPack.Unity#1.0.0`
-
-
-As with the .NET version, the code is generated by a code generator (`MemoryPack.Generator.dll`). Reflection-free implementation also provides the best performance in IL2CPP.
-
-For more information on Unity and Source Generator, please refer to the [Unity documentation](https://docs.unity3d.com/Manual/roslyn-analyzers.html).
-
-Source Generator is also used officially by Unity by [com.unity.properties](https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/index.html) and [com.unity.entities](https://docs.unity3d.com/Packages/com.unity.properties@2.0/changelog/CHANGELOG.html). In other words, it is the standard for code generation in the next generation of Unity.
-
-You can serialize all unmanaged types (such as `Vector3`, `Rect`, etc...) and some classes(`AnimationCurve`, `Gradient`, `RectOffset`). If you want to serialize other Unity-specific types, see [Serialize external types](#serialize-external-types) section.
-
-In Unity performance, MemoryPack is x3~x10 faster than JsonUtility.
-
-![image](https://user-images.githubusercontent.com/46207/209254561-79ec18fe-c421-4d8c-9c86-b55276dd1a45.png)
-
-If shared code has Unity's type(`Vector2`, etc...), MemoryPack provides `MemoryPack.UnityShims` package in NuGet.
-
-The `MemoryPack.UnityShims` package provides shims for Unity's standard structs (`Vector2`, `Vector3`, `Vector4`, `Quaternion`, `Color`, `Bounds`, `Rect`, `Keyframe`, `WrapMode`, `Matrix4x4`, `GradientColorKey`, `GradientAlphaKey`, `GradientMode`, `Color32`, `LayerMask`, `Vector2Int`, `Vector3Int`, `RangeInt`, `RectInt`, `BoundsInt`) and some classes(`AnimationCurve`, `Gradient`, `RectOffset`).
-
-> [!WARNING]
-> Currently, the following limitations exist for use in Unity
-
-
-1. Unity version does not support CustomFormatter.
-2. If you are using .NET7 or later, MemoryPack binary format is not fully compatible with Unity.
-    - This problem occurs with value types that `[StructLayout(LayoutKind.Auto)]` is explicitly specified. (The default for struct is `LayoutKind.Sequencil`.) For such types, binaries serialized in .NET cannot be deserialized in Untiy. Similarly, a binary serialized in Unity cannot be serialized in .NET side.
-    - The affected types typically include the following types.
-        - `DateTimeOffset`
-        - `ValueTuple`
-    - Currently, the simple solution is to not use these types.
-
-
 Native AOT
 ---
-Unfortunately, .NET 7 Native AOT causes crash (`Generic virtual method pointer lookup failure`) when use MemoryPack due to a runtime bug. It 
-is going to be fixed in .NET 8. Using ``Microsoft.DotNet.ILCompiler` preview version, will fix it in .NET 7. Please see [issue's comment](https://github.com/Cysharp/MemoryPack/issues/75#issuecomment-1386884611) how setup it.
+MemoryPack supports Native AOT on the supported target frameworks through source-generated serialization without runtime code generation.
 
 Binary wire format specification
 ---

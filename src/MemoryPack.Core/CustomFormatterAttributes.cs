@@ -3,7 +3,6 @@ using MemoryPack.Formatters;
 
 namespace MemoryPack;
 
-#if !UNITY_2021_2_OR_NEWER
 
 public sealed class Utf8StringFormatterAttribute : MemoryPackCustomFormatterAttribute<Utf8StringFormatter, string>
 {
@@ -12,7 +11,6 @@ public sealed class Utf8StringFormatterAttribute : MemoryPackCustomFormatterAttr
         return Utf8StringFormatter.Default;
     }
 }
-
 public sealed class Utf16StringFormatterAttribute : MemoryPackCustomFormatterAttribute<Utf16StringFormatter, string>
 {
     public override Utf16StringFormatter GetFormatter()
@@ -121,5 +119,3 @@ public sealed class ReadOnlyMemoryPoolFormatterAttribute<T> : MemoryPackCustomFo
         return formatter;
     }
 }
-
-#endif

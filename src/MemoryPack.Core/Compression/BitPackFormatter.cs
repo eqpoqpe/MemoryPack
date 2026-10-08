@@ -8,12 +8,10 @@ using System.Runtime.Intrinsics;
 
 namespace MemoryPack.Compression;
 
-[Preserve]
 public sealed class BitPackFormatter : MemoryPackFormatter<bool[]>
 {
     public static readonly BitPackFormatter Default = new BitPackFormatter();
 
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref bool[]? value)
     {
         if (value == null)
@@ -100,7 +98,6 @@ public sealed class BitPackFormatter : MemoryPackFormatter<bool[]>
         }
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref bool[]? value)
     {
         if (!reader.DangerousTryReadCollectionHeader(out var length))

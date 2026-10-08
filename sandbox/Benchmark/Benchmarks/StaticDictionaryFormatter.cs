@@ -86,7 +86,6 @@ public class StaticDictionaryFormatterCheck
 }
 
 
-[Preserve]
 sealed class DictionaryFormatter<TKey, TValue> : MemoryPackFormatter<Dictionary<TKey, TValue?>>
     where TKey : notnull
 {
@@ -111,7 +110,6 @@ sealed class DictionaryFormatter<TKey, TValue> : MemoryPackFormatter<Dictionary<
         this.equalityComparer = equalityComparer;
     }
 
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref Dictionary<TKey, TValue?>? value)
     {
         if (value == null)
@@ -130,7 +128,6 @@ sealed class DictionaryFormatter<TKey, TValue> : MemoryPackFormatter<Dictionary<
         }
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref Dictionary<TKey, TValue?>? value)
     {
         if (!reader.TryReadCollectionHeader(out var length))
@@ -158,7 +155,6 @@ sealed class DictionaryFormatter<TKey, TValue> : MemoryPackFormatter<Dictionary<
     }
 }
 
-[Preserve]
 sealed class DictionaryFormatter2<TKey, TValue> : MemoryPackFormatter<Dictionary<TKey, TValue?>>
     where TKey : notnull
 {
@@ -175,7 +171,6 @@ sealed class DictionaryFormatter2<TKey, TValue> : MemoryPackFormatter<Dictionary
         this.equalityComparer = equalityComparer;
     }
 
-    [Preserve]
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref Dictionary<TKey, TValue?>? value)
     {
         if (value == null)
@@ -194,7 +189,6 @@ sealed class DictionaryFormatter2<TKey, TValue> : MemoryPackFormatter<Dictionary
         }
     }
 
-    [Preserve]
     public override void Deserialize(ref MemoryPackReader reader, scoped ref Dictionary<TKey, TValue?>? value)
     {
         if (!reader.TryReadCollectionHeader(out var length))

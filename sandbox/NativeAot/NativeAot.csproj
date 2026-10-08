@@ -1,18 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
 
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-
-        <!-- AOT Options -->
-        <!-- https://learn.microsoft.com/ja-jp/dotnet/core/deploying/native-aot/ -->
-        <PublishAot>true</PublishAot>
-        <SelfContained>true</SelfContained>
-        <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
-        <IlcOptimizationPreference>Size</IlcOptimizationPreference>
-        <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
-    </PropertyGroup>
-
+    <!-- AOT Options -->
+    <!-- https://learn.microsoft.com/ja-jp/dotnet/core/deploying/native-aot/ -->
+    <PublishAot>true</PublishAot>
+    <SelfContained>true</SelfContained>
+    <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+    <IlcOptimizationPreference>Size</IlcOptimizationPreference>
+    <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+  </PropertyGroup>
 </Project>

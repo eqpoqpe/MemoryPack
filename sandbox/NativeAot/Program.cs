@@ -8,7 +8,6 @@ var mc = new MemPackObject();
 var formatter = new MemoryPackableFormatter2<MemPackObject>();
 formatter.Serialize<ArrayBufferWriter<byte>>(ref mc);
 
-
 public interface IMemoryPackable2<T>
 {
     static abstract void Serialize<TBufferWriter>(scoped ref T? value)
@@ -41,7 +40,7 @@ public sealed class MemoryPackableFormatter2<T> : MemoryPackFormatter2<T>
 public class MemPackObject : IMemoryPackable2<MemPackObject>
 {
     public static void Serialize<TBufferWriter>(scoped ref MemPackObject? value)
-          where TBufferWriter : IBufferWriter<byte>
+        where TBufferWriter : IBufferWriter<byte>
     {
         Console.WriteLine("OK");
     }

@@ -14,8 +14,7 @@ var config = ManualConfig.CreateMinimumViable()
     // .AddColumn(StatisticColumn.OperationsPerSecond)
     //.AddExporter(DefaultExporters.Plain)
     .AddExporter(MarkdownExporter.Default)
-    .AddJob(Job.Default.WithWarmupCount(1).WithIterationCount(1).WithRuntime(CoreRuntime.Core60))
-    .AddJob(Job.Default.WithWarmupCount(1).WithIterationCount(1).WithRuntime(CoreRuntime.Core70));
+    .AddJob(Job.Default.WithWarmupCount(1).WithIterationCount(1));
 
 #if DEBUG
 

@@ -1,13 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.9.0-beta">
+        <!-- TypeScript adds its emitted files to Content during the build. -->
+        <Content Remove="wwwroot\js\memorypack\**\*.js;wwwroot\js\memorypack\**\*.js.map;wwwroot\js\file.js;wwwroot\js\file.js.map" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.TypeScript.MSBuild">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

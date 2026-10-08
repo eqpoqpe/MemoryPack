@@ -19,7 +19,6 @@ namespace MemoryPack
 
 namespace MemoryPack.Formatters
 {
-    [Preserve]
     public sealed class FrozenDictionaryFormatter<TKey, TValue> : MemoryPackFormatter<FrozenDictionary<TKey, TValue?>>
         where TKey : notnull
     {
@@ -35,7 +34,6 @@ namespace MemoryPack.Formatters
             this.equalityComparer = equalityComparer;
         }
 
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref FrozenDictionary<TKey, TValue?>? value)
         {
             if (value == null)
@@ -59,7 +57,6 @@ namespace MemoryPack.Formatters
             if (i != count) MemoryPackSerializationException.ThrowInvalidConcurrrentCollectionOperation();
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref FrozenDictionary<TKey, TValue?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))
@@ -94,7 +91,6 @@ namespace MemoryPack.Formatters
             this.equalityComparer = equalityComparer;
         }
 
-        [Preserve]
         public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref FrozenSet<T?>? value)
         {
             if (value == null)
@@ -112,7 +108,6 @@ namespace MemoryPack.Formatters
             }
         }
 
-        [Preserve]
         public override void Deserialize(ref MemoryPackReader reader, scoped ref FrozenSet<T?>? value)
         {
             if (!reader.TryReadCollectionHeader(out var length))

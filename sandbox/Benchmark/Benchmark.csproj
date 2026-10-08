@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <Nullable>enable</Nullable>
@@ -20,24 +20,24 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
-        <PackageReference Include="BinaryPack" Version="1.0.3" />
-        <PackageReference Include="K4os.Compression.LZ4" Version="1.2.16" />
-        <PackageReference Include="K4os.Compression.LZ4.Streams" Version="1.2.16" />
-        <PackageReference Include="MessagePack" Version="2.4.35" />
-        <PackageReference Include="MessagePackAnalyzer" Version="2.4.35">
+        <PackageReference Include="BenchmarkDotNet" />
+        <PackageReference Include="BinaryPack" />
+        <PackageReference Include="K4os.Compression.LZ4" />
+        <PackageReference Include="K4os.Compression.LZ4.Streams" />
+        <PackageReference Include="MessagePack" />
+        <PackageReference Include="MessagePackAnalyzer">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-        <PackageReference Include="Microsoft.Orleans.CodeGenerator" Version="7.0.0">
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+        <PackageReference Include="Microsoft.Orleans.CodeGenerator">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Orleans.Serialization" Version="7.0.0" />
-        <PackageReference Include="protobuf-net" Version="3.1.25" />
-        <PackageReference Include="System.IO.Pipelines" Version="6.0.3" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.Orleans.Serialization" />
+        <PackageReference Include="protobuf-net" />
+        <PackageReference Include="System.IO.Pipelines" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
