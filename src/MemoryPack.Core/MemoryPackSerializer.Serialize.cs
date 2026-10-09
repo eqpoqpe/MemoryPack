@@ -44,15 +44,15 @@ public static partial class MemoryPackSerializer
             var length = srcArray.Length;
             if (length == 0)
             {
-                return new byte[4] { 0, 0, 0, 0 };
+                return [0, 0, 0, 0];
             }
 
             var dataSize = elementSize * length;
             var destArray = AllocateUninitializedArray<byte>(dataSize + 4);
-            ref var head = ref MemoryMarshal.GetArrayDataReference(destArray);
+            ref var head = ref GetArrayDataReference(destArray);
 
             Unsafe.WriteUnaligned(ref head, length);
-            Unsafe.CopyBlockUnaligned(ref Unsafe.Add(ref head, 4), ref MemoryMarshal.GetArrayDataReference(srcArray), (uint)dataSize);
+            Unsafe.CopyBlockUnaligned(ref Unsafe.Add(ref head, 4), ref GetArrayDataReference(srcArray), (uint)dataSize);
 
             return destArray;
         }
@@ -85,7 +85,7 @@ public static partial class MemoryPackSerializer
         }
     }
 
-    public static unsafe void Serialize<T, TBufferWriter>(in TBufferWriter bufferWriter, in T? value, MemoryPackSerializerOptions? options = default)
+    public static void Serialize<T, TBufferWriter>(in TBufferWriter bufferWriter, in T? value, MemoryPackSerializerOptions? options = default)
 #if NET7_0_OR_GREATER
         where TBufferWriter : IBufferWriter<byte>
 #else

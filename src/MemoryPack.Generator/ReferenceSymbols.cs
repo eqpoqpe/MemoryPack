@@ -134,6 +134,8 @@ public class ReferenceSymbols
             { "System.Collections.Concurrent.BlockingCollection<>", "global::MemoryPack.Formatters.BlockingCollectionFormatter<TREPLACE>" },
 
             // ImmutableCollectionFormatters
+            { "System.Collections.Frozen.FrozenDictionary<,>", "global::MemoryPack.Formatters.FrozenDictionaryFormatter<TREPLACE>" },
+            { "System.Collections.Frozen.FrozenSet<>", "global::MemoryPack.Formatters.FrozenSetFormatter<TREPLACE>" },
             { "System.Collections.Immutable.ImmutableArray<>", "global::MemoryPack.Formatters.ImmutableArrayFormatter<TREPLACE>" },
             { "System.Collections.Immutable.ImmutableList<>", "global::MemoryPack.Formatters.ImmutableListFormatter<TREPLACE>" },
             { "System.Collections.Immutable.ImmutableQueue<>", "global::MemoryPack.Formatters.ImmutableQueueFormatter<TREPLACE>" },

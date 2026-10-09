@@ -231,6 +231,11 @@ public partial class TypeMeta
     public bool Validate(TypeDeclarationSyntax syntax, IGeneratorContext context, bool unionFormatter)
     {
         var noError = true;
+        if (IsUnion && Symbol.GetMembers("__MemoryPackCreateFormatter").Length != 0)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.ReservedUnionFactory, syntax.Identifier.GetLocation(), Symbol.Name));
+            noError = false;
+        }
         if (unionFormatter) goto UNION_VALIDATIONS;
 
         if (GenerateType == GenerateType.NoGenerate) return true;
@@ -463,7 +468,24 @@ public partial class TypeMeta
         // exists can't serialize member
         foreach (var item in Members)
         {
-
+            if (item.Kind == MemberKind.CustomFormatter)
+            {
+                var attribute = item.CustomFormatterAttribute!;
+                var constructor = attribute.AttributeConstructor;
+                var accessible = constructor != null && reference.Compilation.IsSymbolAccessibleWithin(constructor, Symbol)
+                    && reference.Compilation.IsSymbolAccessibleWithin(attribute.AttributeClass!, Symbol);
+                foreach (var argument in attribute.NamedArguments)
+                {
+                    var member = attribute.AttributeClass!.GetAllMembers().FirstOrDefault(x => x.Name == argument.Key);
+                    accessible &= member != null && reference.Compilation.IsSymbolAccessibleWithin(member, Symbol)
+                        && (member is not IPropertySymbol property || property.SetMethod != null && reference.Compilation.IsSymbolAccessibleWithin(property.SetMethod, Symbol));
+                }
+                if (!accessible)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.CustomFormatterConstruction, item.GetLocation(syntax), Symbol.Name, item.Name));
+                    noError = false;
+                }
+            }
             if (item.Kind == MemberKind.NonSerializable)
             {
                 if (item.MemberType.SpecialType is SpecialType.System_Object or SpecialType.System_Array or SpecialType.System_Delegate or SpecialType.System_MulticastDelegate || item.MemberType.TypeKind == TypeKind.Delegate)
@@ -616,6 +638,7 @@ partial class MemberMeta
     public string Name { get; }
     public ITypeSymbol MemberType { get; }
     public INamedTypeSymbol? CustomFormatter { get; }
+    public AttributeData? CustomFormatterAttribute { get; }
     public string? CustomFormatterName { get; }
     public bool IsField { get; }
     public bool IsProperty { get; }
@@ -707,6 +730,7 @@ partial class MemberMeta
             if (customFormatterAttr != null)
             {
                 CustomFormatter = customFormatterAttr.AttributeClass!;
+                CustomFormatterAttribute = customFormatterAttr;
                 Kind = MemberKind.CustomFormatter;
 
                 string formatterName;

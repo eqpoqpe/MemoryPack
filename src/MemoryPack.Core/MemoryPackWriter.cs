@@ -168,12 +168,14 @@ public ref partial struct MemoryPackWriter<TBufferWriter>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IMemoryPackFormatter GetFormatter(Type type)
     {
+        if (optionalState.Context is { } context) return context.GetRequiredTypeInfo(type).Formatter;
         return MemoryPackFormatterProvider.GetFormatter(type);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IMemoryPackFormatter<T> GetFormatter<T>()
     {
+        if (optionalState.Context is { } context) return context.GetTypeInfo<T>().Formatter;
         return MemoryPackFormatterProvider.GetFormatter<T>();
     }
 

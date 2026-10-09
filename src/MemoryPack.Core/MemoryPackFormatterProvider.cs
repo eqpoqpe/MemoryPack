@@ -16,16 +16,16 @@ namespace MemoryPack;
 public static partial class MemoryPackFormatterProvider
 {
     // for nongenerics methods
-    static readonly ConcurrentDictionary<Type, IMemoryPackFormatter> formatters = new ConcurrentDictionary<Type, IMemoryPackFormatter>(Environment.ProcessorCount, 150);
+    static readonly ConcurrentDictionary<Type, IMemoryPackFormatter> formatters = new(Environment.ProcessorCount, 150);
 
     // custom generic formatters
-    static readonly ConcurrentDictionary<Type, Type> genericFormatterFactory = new ConcurrentDictionary<Type, Type>();
+    static readonly ConcurrentDictionary<Type, Type> genericFormatterFactory = new();
 
     // custom generic collection formatters
-    static readonly ConcurrentDictionary<Type, Type> genericCollectionFormatterFactory = new ConcurrentDictionary<Type, Type>();
+    static readonly ConcurrentDictionary<Type, Type> genericCollectionFormatterFactory = new();
 
     // generics known types
-    static readonly Dictionary<Type, Type> KnownGenericTypeFormatters = new Dictionary<Type, Type>(3)
+    static readonly Dictionary<Type, Type> KnownGenericTypeFormatters = new(3)
     {
         { typeof(KeyValuePair<,>), typeof(KeyValuePairFormatter<,>) },
         { typeof(Lazy<>), typeof(LazyFormatter<>) },
@@ -42,13 +42,20 @@ public static partial class MemoryPackFormatterProvider
         RegisterInitialFormatters();
     }
 
-    public static bool IsRegistered<T>() => Check<T>.registered;
+    public static bool IsRegistered<T>() => formatters.TryGetValue(typeof(T), out var formatter)
+        && formatter is MemoryPackFormatter<T> && formatter is not ErrorMemoryPackFormatter<T>;
 
     public static void Register<T>(MemoryPackFormatter<T> formatter)
     {
-        Check<T>.registered = true; // avoid to call Cache() constructor called.
-        formatters[typeof(T)] = formatter;
-        Cache<T>.formatter = formatter;
+        ArgumentNullException.ThrowIfNull(formatter);
+        // Seed the dictionary before initializing Cache<T>, so its constructor can resolve
+        // this registration even when another thread reaches the cache first.
+        formatters.TryAdd(typeof(T), formatter);
+        lock (Cache<T>.registrationLock)
+        {
+            formatters[typeof(T)] = formatter;
+            Volatile.Write(ref Cache<T>.formatter, formatter);
+        }
     }
 
 #if NET7_0_OR_GREATER
@@ -134,7 +141,7 @@ public static partial class MemoryPackFormatterProvider
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static MemoryPackFormatter<T> GetFormatter<T>()
     {
-        return Cache<T>.formatter;
+        return Volatile.Read(ref Cache<T>.formatter);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -145,6 +152,19 @@ public static partial class MemoryPackFormatterProvider
             return formatter;
         }
 
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            return new ErrorMemoryPackFormatter(type, MissingRegistrationMessage(type));
+        }
+
+        return GetFormatterWithReflection(type);
+    }
+
+    [RequiresDynamicCode("Formatter discovery constructs generic formatter types. Use a generated MemoryPack serialization context for NativeAOT.")]
+    [RequiresUnreferencedCode("Formatter discovery reflects over generated registration methods. Use a generated MemoryPack serialization context for trimming.")]
+    static IMemoryPackFormatter GetFormatterWithReflection(Type type)
+    {
+        IMemoryPackFormatter? formatter;
         if (TryInvokeRegisterFormatter(type))
         {
             // try again
@@ -174,6 +194,10 @@ public static partial class MemoryPackFormatterProvider
         return formatter;
     }
 
+    internal static string MissingRegistrationMessage(Type type) =>
+        $"Type {type.FullName} is not registered. Add it to a [MemoryPackSerializable] context and call its Register() method, or register a concrete formatter with MemoryPackFormatterProvider.Register.";
+
+    [RequiresUnreferencedCode("Reflects over generated registration methods.")]
     static bool TryInvokeRegisterFormatter(Type type)
     {
         if (typeof(IMemoryPackFormatterRegister).IsAssignableFrom(type))
@@ -196,19 +220,32 @@ public static partial class MemoryPackFormatterProvider
         return false;
     }
 
-    static class Check<T>
-    {
-        public static bool registered;
-    }
-
     static class Cache<T>
     {
+        public static readonly object registrationLock = new();
         public static MemoryPackFormatter<T> formatter = default!;
 
         static Cache()
         {
-            if (Check<T>.registered) return;
+            if (formatters.TryGetValue(typeof(T), out var registered) && registered is MemoryPackFormatter<T> typedFormatter)
+            {
+                formatter = typedFormatter;
+                return;
+            }
 
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                formatter = new ErrorMemoryPackFormatter<T>(MissingRegistrationMessage(typeof(T)));
+                return;
+            }
+
+            InitializeWithReflection();
+        }
+
+        [RequiresDynamicCode("Formatter discovery constructs generic formatter types.")]
+        [RequiresUnreferencedCode("Formatter discovery reflects over generated registration methods.")]
+        static void InitializeWithReflection()
+        {
             try
             {
                 var type = typeof(T);
@@ -235,10 +272,11 @@ public static partial class MemoryPackFormatterProvider
 
         END:
             formatters[typeof(T)] = formatter;
-            Check<T>.registered = true;
         }
     }
 
+    [RequiresDynamicCode("Constructs generic formatter types at runtime.")]
+    [RequiresUnreferencedCode("Formatter constructors cannot be determined statically.")]
     internal static object? CreateGenericFormatter(Type type, bool typeIsReferenceOrContainsReferences)
     {
         Type? formatterType = null;
@@ -322,6 +360,8 @@ public static partial class MemoryPackFormatterProvider
         return Activator.CreateInstance(formatterType);
     }
 
+    [RequiresDynamicCode("Constructs generic formatter types at runtime.")]
+    [RequiresUnreferencedCode("Formatter constructors cannot be determined statically.")]
     static Type? TryCreateGenericFormatterType(Type type, IDictionary<Type, Type> knownTypes)
     {
         if (type.IsGenericType)
@@ -337,6 +377,8 @@ public static partial class MemoryPackFormatterProvider
         return null;
     }
 
+    [RequiresDynamicCode("Constructs generic formatter types at runtime.")]
+    [RequiresUnreferencedCode("Formatter constructors cannot be determined statically.")]
     static Type? TryCreateGenericCollectionFormatterType(Type type)
     {
         if (type.IsGenericType && genericCollectionFormatterFactory.TryGetValue(type, out var formatterType))

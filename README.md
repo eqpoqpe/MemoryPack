@@ -1320,7 +1320,78 @@ RPC
 
 Native AOT
 ---
-MemoryPack supports Native AOT on the supported target frameworks through source-generated serialization without runtime code generation.
+MemoryPack supports Native AOT through source-generated serialization contexts and type metadata. An instance context owns an independent set of concrete formatters and serializer options:
+
+```csharp
+[MemoryPackSerializable<Order>]
+[MemoryPackSerializable<List<Order>>]
+[MemoryPackSerializable<IOrderEvent>]
+internal partial class AppSerializerContext : MemoryPackSerializerContext { }
+
+var context = AppSerializerContext.Default;
+var bytes = MemoryPackSerializer.Serialize(order, context.Order);
+var restored = MemoryPackSerializer.Deserialize(bytes, context.Order);
+// A context can also resolve the type at the call site.
+var sameBytes = MemoryPackSerializer.Serialize(order, context);
+var utf16 = new AppSerializerContext(MemoryPackSerializerOptions.Utf16);
+```
+
+Instance contexts must be top-level, non-generic, non-abstract partial classes deriving directly from `MemoryPackSerializerContext`. The generator supplies parameterless/options constructors, `Default`, root properties, and stable metadata for the complete dependency graph. Do not declare these constructors or reserved generated members yourself. `GetTypeInfo(Type)` returns null for unknown types; `GetTypeInfo<T>()` throws an actionable exception for unknown or incorrectly owned metadata. Root property names concatenate CLR type names, for example `Order`, `BoxInt32`, and `ListOrder`. Use `TypeInfoPropertyName = "Orders"` on a root attribute to resolve name collisions. Tuple element names and nullable reference annotations do not create distinct runtime metadata identities; named root tuple annotations remain available through their properties and generic lookup.
+
+`MemoryPackTypeInfo<T>` contains immutable `Type`, `Formatter`, and optional `Context` references. It can also be created manually:
+
+```csharp
+var typeInfo = new MemoryPackTypeInfo<Order>(new OrderFormatter());
+var bytes = MemoryPackSerializer.Serialize(order, typeInfo);
+MemoryPackTypeInfo untyped = typeInfo;
+var restored = MemoryPackSerializer.Deserialize(untyped, bytes);
+```
+
+Metadata overloads always invoke the root formatter, including custom formatters for unmanaged values. They support spans, segmented sequences, overwrite deserialization, buffer writers, and asynchronous streams; untyped overloads validate the value against the metadata type. Options default to the owning context's options, or the serializer default for standalone metadata. A metadata overload's explicit options override applies only to that operation. Context overloads use the context's options. New operations rent separate state and clear the context binding on return, including failure/cancellation paths. Nested provider lookups remain within the same context and never fall back globally when a dependency is missing. Standalone metadata with no context uses the global provider for its nested dependencies.
+
+Calls that previously passed an untyped null options argument, such as `Serialize(value, null)` or `Deserialize<T>(buffer, null)`, become ambiguous with the new metadata/context overloads. Use `options: null` or an explicit `(MemoryPackSerializerOptions?)null` cast to retain the legacy options overload.
+
+Explicit `FormatterType` mappings in an instance context stay in that context; they do not replace global registrations. Generated direct calls for primitive members, packable models, and optimized model collections retain their compiled dispatch semantics. Use a member formatter when those member encodings must change. Generated model static constructors may still register their default global formatters for existing API compatibility, but instance metadata construction and lookup do not depend on those registrations. Existing ref serialization callbacks retain their payload/order and reference replacement behavior. Opaque formatter and callback bodies that call provider-based APIs must declare their additional dependency roots explicitly. `NoGenerate` types with only global registration require an explicit formatter for instance metadata; a statically known packable implementation or direct formatter factory is also supported. Referenced union types from an older generator without a factory require explicit `FormatterType` and case roots. Generated union factory member `__MemoryPackCreateFormatter` is reserved. Typed asynchronous deserialization currently uses the untyped formatter adapter internally, including boxing for value-type results.
+
+The legacy static registration context remains supported for applications using the global provider:
+
+```csharp
+[MemoryPackSerializable<Order>]
+[MemoryPackSerializable<List<Order>>]
+[MemoryPackSerializable<IOrderEvent>]
+internal static partial class AppMemoryPackContext
+{
+}
+
+AppMemoryPackContext.Register();
+var bytes = MemoryPackSerializer.Serialize(order);
+var restored = MemoryPackSerializer.Deserialize<Order>(bytes);
+```
+
+`[MemoryPackSerializable(typeof(Order))]` is also supported in both context styles. The generic form requires C# 11 or later. Static registration contexts must be top-level, non-generic static partial classes. `Register()` is thread-safe and repeatable, and uses the existing global formatter provider.
+
+Both context styles include reachable model members, supported arrays and collections, closed generic types, declared union cases, and computed built-in formatter dependencies such as priority-queue tuple entries and lookup groupings. Recursive graphs with a bounded set of concrete types are supported. Source-declared external union formatters are discovered, including closed instances of generic unions. Open generic roots, inaccessible dependencies, and types without a statically known formatter produce compilation diagnostics. Dependency paths exceeding 128 levels are diagnosed, including infinitely expanding generic recursion such as `Node<T>` containing `Node<List<T>>`. This limit applies to an active dependency path, not the number of independent roots. Individual dependency types are also limited to 512 structural nodes to reject exponentially expanding generic arguments before materializing their names. Declare every closed generic root used at runtime; arbitrary runtime subtypes and generic instantiations cannot be inferred.
+
+Supply an external formatter explicitly when needed:
+
+```csharp
+[MemoryPackSerializable<ExternalValue>(FormatterType = typeof(ExternalValueFormatter))]
+internal static partial class ExternalContext { }
+```
+
+`FormatterType` must be an accessible, concrete `MemoryPackFormatter<ExternalValue>` with an accessible parameterless constructor. In static registration contexts, explicit mappings replace existing provider registrations when the context first registers; repeated calls leave them in place. This applies to paths that resolve through the provider. Existing generated direct calls for primitives, models, and optimized model collections continue to use their generated serialization methods. Member-level custom formatter attributes are constructed directly with their constructor and named arguments. Their payload types and explicit external formatters are opaque dependencies: if formatter code calls `WriteValue<Other>()` or `ReadValue<Other>()`, declare `Other` as another context root. Referenced external union formatters can be supplied through `FormatterType`, together with their required case roots.
+
+Native AOT resolves registered formatters without reflection or runtime generic construction. Missing registrations throw `MemoryPackSerializationException` with the missing type and registration instructions; a subsequent concrete registration can recover. Unmanaged values and built-in formatters remain supported. The optional reflected array/fixed-size allocation fast paths are bypassed in Native AOT, preserving serialized bytes without claiming the same allocation or throughput performance.
+
+For `System.Type` values, register allowed names explicitly before deserialization:
+
+```csharp
+MemoryPack.Formatters.TypeFormatter.RegisterType<Order>();
+```
+
+The formatter retains the existing serialized type-name format and rejects unmapped names in Native AOT. A custom `MemoryPackFormatter<Type>` is another option. Normal untrimmed JIT execution retains reflection discovery and name-based `Type` resolution. A generated context alone does not make reflection fallback warning-free in trimmed JIT applications where dynamic code is enabled.
+
+The [ZeroNativeAot sandbox](sandbox/ZeroNativeAot/README.md) provides a reproducible native publish check that rejects IL trimming/AOT warnings and executes the smoke scenarios, including isolated deserialize-first checks.
 
 Binary wire format specification
 ---

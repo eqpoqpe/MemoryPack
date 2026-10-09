@@ -1,14 +1,12 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace MemoryPack.Internal;
 
 internal static class TypeHelpers
 {
-    static readonly MethodInfo isReferenceOrContainsReferences = typeof(RuntimeHelpers).GetMethod("IsReferenceOrContainsReferences")!;
-    static readonly MethodInfo unsafeSizeOf = typeof(Unsafe).GetMethod("SizeOf")!;
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsReferenceOrNullable<T>()
     {
@@ -56,19 +54,28 @@ internal static class TypeHelpers
 
         static Cache()
         {
+            var type = typeof(T);
+            IsReferenceOrNullable = !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
+            if (!RuntimeFeature.IsDynamicCodeSupported) return;
+            InitializeWithReflection();
+        }
+
+        [RequiresDynamicCode("Optional fast paths inspect generic array element types at runtime.")]
+        [RequiresUnreferencedCode("Optional fast paths inspect generated fixed-size properties at runtime.")]
+        static void InitializeWithReflection()
+        {
             try
             {
                 var type = typeof(T);
-                IsReferenceOrNullable = !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
 
                 if (type.IsSZArray)
                 {
                     var elementType = type.GetElementType();
-                    bool containsReference = (bool)(isReferenceOrContainsReferences.MakeGenericMethod(elementType!).Invoke(null, null)!);
+                    bool containsReference = (bool)(typeof(RuntimeHelpers).GetMethod("IsReferenceOrContainsReferences")!.MakeGenericMethod(elementType!).Invoke(null, null)!);
                     if (!containsReference)
                     {
                         IsUnmanagedSZArray = true;
-                        UnmanagedSZArrayElementSize = (int)unsafeSizeOf.MakeGenericMethod(elementType!).Invoke(null, null)!;
+                        UnmanagedSZArrayElementSize = (int)typeof(Unsafe).GetMethod("SizeOf")!.MakeGenericMethod(elementType!).Invoke(null, null)!;
                     }
                 }
 #if NET7_0_OR_GREATER

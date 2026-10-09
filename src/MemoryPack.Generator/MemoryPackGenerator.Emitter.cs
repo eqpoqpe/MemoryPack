@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics;
@@ -401,6 +401,16 @@ partial {{classOrStructOrRecord}} {{TypeName}} : IMemoryPackable<{{TypeName}}>{{
 {{EmitAdditionalRegisterFormatter("        ", context)}}
     }
     {{staticMemoryPackableMethod}}{{serializeMethodSignarture}} writer, {{scopedRef}} {{TypeName}}{{nullable}} value) {{constraint}}
+{{(GenerateType == GenerateType.CircularReference ? $$"""
+    {
+        __MemoryPackSerialize(ref writer, ref value);
+    }
+    // Keep the body behind a non-inlined helper: the combined generic static-interface
+    // circular serializer crashes in the observed .NET 11 NativeAOT build.
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    static void __MemoryPackSerialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, {{scopedRef}} {{TypeName}}{{nullable}} value)
+        where TBufferWriter : {{(context.IsNet7OrGreater ? "" : "class, ")}}global::System.Buffers.IBufferWriter<byte>
+""" : "")}}
     {
 {{OnSerializing.Select(x => "        " + x.Emit()).NewLine()}}
 {{serializeBody}}
@@ -624,11 +634,28 @@ partial {{classOrStructOrRecord}} {{TypeName}}
         var sb = new StringBuilder();
         foreach (var item in Members.Where(x => x.Kind == MemberKind.CustomFormatter))
         {
-            var fieldOrProp = item.IsField ? "Field" : "Property";
-
-            sb.AppendLine($"    static readonly {item.CustomFormatterName} __{item.Name}Formatter = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<{item.CustomFormatter!.FullyQualifiedToString()}>(typeof({this.Symbol.FullyQualifiedToString()}).Get{fieldOrProp}(\"{item.Name}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)).GetFormatter();");
+            var attribute = item.CustomFormatterAttribute!;
+            var arguments = string.Join(", ", attribute.ConstructorArguments.Select((argument, index) =>
+                $"({attribute.AttributeConstructor!.Parameters[index].Type.FullyQualifiedToString()})({FormatAttributeConstant(argument)})"));
+            var namedArguments = attribute.NamedArguments.Length == 0 ? "" :
+                " { " + string.Join(", ", attribute.NamedArguments.Select(x => "@" + x.Key + " = " + FormatAttributeConstant(x.Value))) + " }";
+            sb.AppendLine($"    static readonly {item.CustomFormatterName} __{item.Name}Formatter = (new {item.CustomFormatter!.FullyQualifiedToString()}({arguments}){namedArguments}).GetFormatter();");
         }
         return sb.ToString();
+    }
+
+    static string FormatAttributeConstant(TypedConstant constant)
+    {
+        if (constant.IsNull) return constant.Type == null ? "null!" : $"({constant.Type.FullyQualifiedToString()})null!";
+        if (constant.Kind == TypedConstantKind.Type) return $"typeof({((ITypeSymbol)constant.Value!).FullyQualifiedToString()})";
+        if (constant.Kind == TypedConstantKind.Array)
+        {
+            var element = ((IArrayTypeSymbol)constant.Type!).ElementType.FullyQualifiedToString();
+            return $"new {element}[] {{ {string.Join(", ", constant.Values.Select(FormatAttributeConstant))} }}";
+        }
+        var literal = constant.ToCSharpString();
+        // Explicit casts retain the precise boxed primitive type for object-valued attribute arguments.
+        return $"({constant.Type!.FullyQualifiedToString()})({literal})";
     }
 
     string EmitSerializeBody()
@@ -979,6 +1006,8 @@ partial {{classOrStructOrRecord}} {{TypeName}}
 partial {{classOrInterfaceOrRecord}} {{TypeName}} : IMemoryPackFormatterRegister
 {
     static partial void StaticConstructor();
+
+    public static global::MemoryPack.MemoryPackFormatter<{{TypeName}}> __MemoryPackCreateFormatter() => new {{Symbol.Name}}Formatter();
 
     static {{Symbol.Name}}()
     {

@@ -1,9 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\MemoryPack.Core\MemoryPack.Core.csproj" />
-    <ProjectReference Include="..\..\src\MemoryPack.Generator\MemoryPack.Generator.csproj"
-                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference
+      Include="..\..\src\MemoryPack.Generator\MemoryPack.Generator.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
   </ItemGroup>
 
   <PropertyGroup>
@@ -15,4 +17,19 @@
     <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
   </PropertyGroup>
 
+  <!--
+    .NET 10 NativeAOT captures stdout and stderr from findvcvarsall.bat into
+    the tool paths. Shell startup diagnostics can be prepended as list entries.
+    Recover the final path only when it points to an installed tool.
+  -->
+  <Target Name="AngelaNormalizeNativeAotToolPaths" BeforeTargets="LinkNative" DependsOnTargets="SetupOSSpecificProps" Condition="'$(PublishAot)' == 'true' and '$(_targetOS)' == 'win' and '$(IlcUseEnvironmentalTools)' != 'true'">
+    <PropertyGroup>
+      <_AngelaCppLinkerCandidate>$(CppLinker.Substring($([MSBuild]::Add($(CppLinker.LastIndexOf(';')), 1))).Trim())</_AngelaCppLinkerCandidate>
+      <_AngelaCppLibCreatorCandidate>$(CppLibCreator.Substring($([MSBuild]::Add($(CppLibCreator.LastIndexOf(';')), 1))).Trim())</_AngelaCppLibCreatorCandidate>
+    </PropertyGroup>
+    <PropertyGroup>
+      <CppLinker Condition="!Exists('$(CppLinker)') and Exists('$(_AngelaCppLinkerCandidate)')">$(_AngelaCppLinkerCandidate)</CppLinker>
+      <CppLibCreator Condition="!Exists('$(CppLibCreator)') and Exists('$(_AngelaCppLibCreatorCandidate)')">$(_AngelaCppLibCreatorCandidate)</CppLibCreator>
+    </PropertyGroup>
+  </Target>
 </Project>

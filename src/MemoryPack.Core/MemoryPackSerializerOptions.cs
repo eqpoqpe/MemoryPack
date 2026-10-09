@@ -3,7 +3,7 @@
     public record MemoryPackSerializerOptions
     {
         // Default is Utf8
-        public static readonly MemoryPackSerializerOptions Default = new MemoryPackSerializerOptions { StringEncoding = StringEncoding.Utf8 };
+        public static readonly MemoryPackSerializerOptions Default = new() { StringEncoding = StringEncoding.Utf8 };
 
         public static readonly MemoryPackSerializerOptions Utf8 = Default with { StringEncoding = StringEncoding.Utf8 };
         public static readonly MemoryPackSerializerOptions Utf16 = Default with { StringEncoding = StringEncoding.Utf16 };

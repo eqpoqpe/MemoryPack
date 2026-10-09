@@ -46,6 +46,28 @@ public enum GenerateType
     NoGenerate
 }
 
+/// <summary>Declares a root in a source-generated, static formatter registration context.</summary>
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+public sealed class MemoryPackSerializableAttribute<T> : Attribute
+{
+    public Type Type { get; } = typeof(T);
+
+    /// <summary>Optional concrete formatter with an accessible parameterless constructor.</summary>
+    public Type? FormatterType { get; set; }
+
+    /// <summary>Optional root metadata property name in an instance serialization context.</summary>
+    public string? TypeInfoPropertyName { get; set; }
+}
+
+/// <summary>Declares a root using a runtime type constant, including closed generic types.</summary>
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+public sealed class MemoryPackSerializableAttribute(Type type) : Attribute
+{
+    public Type Type { get; } = type;
+    public Type? FormatterType { get; set; }
+    public string? TypeInfoPropertyName { get; set; }
+}
+
 public enum SerializeLayout
 {
     Sequential, // default
@@ -53,27 +75,16 @@ public enum SerializeLayout
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true, Inherited = false)]
-public sealed class MemoryPackUnionAttribute : Attribute
+public sealed class MemoryPackUnionAttribute(ushort tag, Type type) : Attribute
 {
-    public ushort Tag { get; }
-    public Type Type { get; }
-
-    public MemoryPackUnionAttribute(ushort tag, Type type)
-    {
-        this.Tag = tag;
-        this.Type = type;
-    }
+    public ushort Tag { get; } = tag;
+    public Type Type { get; } = type;
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-public sealed class MemoryPackUnionFormatterAttribute : Attribute
+public sealed class MemoryPackUnionFormatterAttribute(Type type) : Attribute
 {
-    public Type Type { get; }
-
-    public MemoryPackUnionFormatterAttribute(Type type)
-    {
-        this.Type = type;
-    }
+    public Type Type { get; } = type;
 }
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
@@ -82,16 +93,10 @@ public sealed class MemoryPackAllowSerializeAttribute : Attribute
 }
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-public sealed class MemoryPackOrderAttribute : Attribute
+public sealed class MemoryPackOrderAttribute(int order) : Attribute
 {
-    public int Order { get; }
-
-    public MemoryPackOrderAttribute(int order)
-    {
-        this.Order = order;
-    }
+    public int Order { get; } = order;
 }
-
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 public abstract class MemoryPackCustomFormatterAttribute<T> : Attribute

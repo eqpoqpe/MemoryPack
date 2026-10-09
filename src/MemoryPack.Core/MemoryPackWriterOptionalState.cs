@@ -35,6 +35,7 @@ public sealed class MemoryPackWriterOptionalState : IDisposable
     readonly Dictionary<object, uint> objectToRef;
 
     public MemoryPackSerializerOptions Options { get; private set; }
+    internal MemoryPackSerializerContext? Context { get; set; }
 
     internal MemoryPackWriterOptionalState()
     {
@@ -50,15 +51,17 @@ public sealed class MemoryPackWriterOptionalState : IDisposable
         nextId = 0;
     }
 
-    internal void Init(MemoryPackSerializerOptions? options)
+    internal void Init(MemoryPackSerializerOptions? options, MemoryPackSerializerContext? context = null)
     {
         Options = options ?? MemoryPackSerializerOptions.Default;
+        Context = context;
     }
 
     public void Reset()
     {
         objectToRef.Clear();
         Options = null!;
+        Context = null;
         nextId = 0;
     }
 

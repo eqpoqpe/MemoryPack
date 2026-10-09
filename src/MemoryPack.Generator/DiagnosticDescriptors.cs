@@ -9,6 +9,12 @@ internal static class DiagnosticDescriptors
 {
     const string Category = "GenerateMemoryPack";
 
+    public static readonly DiagnosticDescriptor ReservedUnionFactory = new(
+        "MEMPACK054", "Reserved union factory name", "Union type '{0}' declares reserved generated member __MemoryPackCreateFormatter", Category, DiagnosticSeverity.Error, true);
+
+    public static readonly DiagnosticDescriptor CustomFormatterConstruction = new(
+        "MEMPACK052", "Custom formatter attribute cannot be constructed", "Type '{0}' member '{1}' uses a custom formatter attribute whose constructor or named members are inaccessible to generated code", Category, DiagnosticSeverity.Error, true);
+
     public static readonly DiagnosticDescriptor MustBePartial = new(
         id: "MEMPACK001",
         title: "MemoryPackable object must be partial",

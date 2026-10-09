@@ -40,6 +40,7 @@ public partial class MemoryPackGenerator : IIncrementalGenerator
         // no need RegisterPostInitializationOutput
 
         RegisterMemoryPackable(context);
+        RegisterSerializationContexts(context);
         RegisterTypeScript(context);
     }
 

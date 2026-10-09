@@ -28,6 +28,7 @@ public sealed class MemoryPackReaderOptionalState : IDisposable
 {
     readonly Dictionary<uint, object> refToObject;
     public MemoryPackSerializerOptions Options { get; private set; }
+    internal MemoryPackSerializerContext? Context { get; set; }
 
     internal MemoryPackReaderOptionalState()
     {
@@ -35,9 +36,10 @@ public sealed class MemoryPackReaderOptionalState : IDisposable
         Options = null!;
     }
 
-    internal void Init(MemoryPackSerializerOptions? options)
+    internal void Init(MemoryPackSerializerOptions? options, MemoryPackSerializerContext? context = null)
     {
         Options = options ?? MemoryPackSerializerOptions.Default;
+        Context = context;
     }
 
     public object GetObjectReference(uint id)
@@ -62,6 +64,7 @@ public sealed class MemoryPackReaderOptionalState : IDisposable
     {
         refToObject.Clear();
         Options = null!;
+        Context = null;
     }
 
     void IDisposable.Dispose()
