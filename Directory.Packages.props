@@ -10,8 +10,8 @@
     <PackageVersion Include="FluentAssertions" Version="6.7.0" />
     <PackageVersion Include="K4os.Compression.LZ4" Version="1.2.16" />
     <PackageVersion Include="K4os.Compression.LZ4.Streams" Version="1.2.16" />
-    <PackageVersion Include="MessagePack" Version="2.4.35" />
-    <PackageVersion Include="MessagePackAnalyzer" Version="2.4.35" />
+    <PackageVersion Include="MessagePack" Version="3.1.11" />
+    <PackageVersion Include="MessagePackAnalyzer" Version="3.1.11" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />

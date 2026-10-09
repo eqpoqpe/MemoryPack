@@ -610,7 +610,7 @@ public ref partial struct MemoryPackReader
 
         if (value.Length != length)
         {
-            value = new T[length];
+            value = new T?[length];
         }
 
         var formatter = GetFormatter<T>();
@@ -696,7 +696,7 @@ public ref partial struct MemoryPackReader
 
         if (value.Length != length)
         {
-            value = new T[length];
+            value = new T?[length];
         }
 
         for (int i = 0; i < length; i++)
@@ -798,7 +798,7 @@ public ref partial struct MemoryPackReader
         var byteCount = length * Unsafe.SizeOf<T>();
         ref var src = ref GetSpanReference(byteCount);
 
-        if (value == null || value.Length != length)
+        if (value.Length != length)
         {
             value = AllocateUninitializedArray<T>(length);
         }
@@ -824,7 +824,7 @@ public ref partial struct MemoryPackReader
         {
             if (value.Length != length)
             {
-                value = AllocateUninitializedArray<T>(length);
+                value = AllocateUninitializedArray<T?>(length);
             }
 
             var byteCount = length * Unsafe.SizeOf<T>();
@@ -838,7 +838,7 @@ public ref partial struct MemoryPackReader
         {
             if (value.Length != length)
             {
-                value = new T[length];
+                value = new T?[length];
             }
 
             var formatter = GetFormatter<T>();
@@ -867,7 +867,7 @@ public ref partial struct MemoryPackReader
         {
             if (value.Length != length)
             {
-                value = AllocateUninitializedArray<T>(length);
+                value = AllocateUninitializedArray<T?>(length);
             }
 
             var byteCount = length * Unsafe.SizeOf<T>();
@@ -881,7 +881,7 @@ public ref partial struct MemoryPackReader
         {
             if (value.Length != length)
             {
-                value = new T[length];
+                value = new T?[length];
             }
 
             for (int i = 0; i < length; i++)

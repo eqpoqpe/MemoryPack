@@ -65,9 +65,12 @@
         </Compile>
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Polyester" />
+    </ItemGroup>
+
     <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
       <PackageReference Include="Failure" />
-      <PackageReference Include="Polyester" />
     </ItemGroup>
 
 </Project>

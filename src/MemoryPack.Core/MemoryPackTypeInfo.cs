@@ -7,7 +7,11 @@ public abstract class MemoryPackTypeInfo
     public IMemoryPackFormatter Formatter { get; }
     public MemoryPackSerializerContext? Context { get; }
 
-    private protected MemoryPackTypeInfo(Type type, IMemoryPackFormatter formatter, MemoryPackSerializerContext? context)
+    private protected MemoryPackTypeInfo(
+        Type type,
+        IMemoryPackFormatter formatter,
+        MemoryPackSerializerContext? context
+    )
     {
         Type = type;
         Formatter = formatter;
@@ -16,13 +20,15 @@ public abstract class MemoryPackTypeInfo
 }
 
 /// <summary>Serialization metadata backed by an explicitly supplied formatter.</summary>
-public sealed class MemoryPackTypeInfo<T> : MemoryPackTypeInfo
+public sealed class MemoryPackTypeInfo<T>(
+    MemoryPackFormatter<T> formatter,
+    MemoryPackSerializerContext? context = null
+)
+    : MemoryPackTypeInfo(
+        typeof(T),
+        formatter ?? throw new ArgumentNullException(nameof(formatter)),
+        context
+    )
 {
-    public new MemoryPackFormatter<T> Formatter { get; }
-
-    public MemoryPackTypeInfo(MemoryPackFormatter<T> formatter, MemoryPackSerializerContext? context = null)
-        : base(typeof(T), formatter ?? throw new ArgumentNullException(nameof(formatter)), context)
-    {
-        Formatter = formatter;
-    }
+    public new MemoryPackFormatter<T> Formatter { get; } = formatter;
 }
