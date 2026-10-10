@@ -19,6 +19,10 @@
         <Description>Code generator for MemoryPack.</Description>
     </PropertyGroup>
 
+    <PropertyGroup>
+      <PackageId>Universe.MemoryPack.Generator</PackageId>
+    </PropertyGroup>
+
     <ItemGroup>
         <!-- https://learn.microsoft.com/en-us/visualstudio/extensibility/roslyn-version-support?view=vs-2022 -->
         <!-- require to support SyntaxValueProvider.ForAttributeWithMetadataName(Roslyn 4.3.0, VS2022 17.3) -->

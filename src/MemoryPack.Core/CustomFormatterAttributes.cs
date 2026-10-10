@@ -3,15 +3,17 @@ using MemoryPack.Formatters;
 
 namespace MemoryPack;
 
-
-public sealed class Utf8StringFormatterAttribute : MemoryPackCustomFormatterAttribute<Utf8StringFormatter, string>
+public sealed class Utf8StringFormatterAttribute
+    : MemoryPackCustomFormatterAttribute<Utf8StringFormatter, string>
 {
     public override Utf8StringFormatter GetFormatter()
     {
         return Utf8StringFormatter.Default;
     }
 }
-public sealed class Utf16StringFormatterAttribute : MemoryPackCustomFormatterAttribute<Utf16StringFormatter, string>
+
+public sealed class Utf16StringFormatterAttribute
+    : MemoryPackCustomFormatterAttribute<Utf16StringFormatter, string>
 {
     public override Utf16StringFormatter GetFormatter()
     {
@@ -19,9 +21,15 @@ public sealed class Utf16StringFormatterAttribute : MemoryPackCustomFormatterAtt
     }
 }
 
-public sealed class OrdinalIgnoreCaseStringDictionaryFormatter<TValue> : MemoryPackCustomFormatterAttribute<DictionaryFormatter<string, TValue?>, Dictionary<string, TValue?>>
+public sealed class OrdinalIgnoreCaseStringDictionaryFormatter<TValue>
+    : MemoryPackCustomFormatterAttribute<
+        DictionaryFormatter<string, TValue?>,
+        Dictionary<string, TValue?>
+    >
 {
-    static readonly DictionaryFormatter<string, TValue?> formatter = new DictionaryFormatter<string, TValue?>(StringComparer.OrdinalIgnoreCase);
+    static readonly DictionaryFormatter<string, TValue?> formatter = new(
+        StringComparer.OrdinalIgnoreCase
+    );
 
     public override DictionaryFormatter<string, TValue?> GetFormatter()
     {
@@ -29,7 +37,8 @@ public sealed class OrdinalIgnoreCaseStringDictionaryFormatter<TValue> : MemoryP
     }
 }
 
-public sealed class InternStringFormatterAttribute : MemoryPackCustomFormatterAttribute<InternStringFormatter, string>
+public sealed class InternStringFormatterAttribute
+    : MemoryPackCustomFormatterAttribute<InternStringFormatter, string>
 {
     public override InternStringFormatter GetFormatter()
     {
@@ -37,7 +46,8 @@ public sealed class InternStringFormatterAttribute : MemoryPackCustomFormatterAt
     }
 }
 
-public sealed class BitPackFormatterAttribute : MemoryPackCustomFormatterAttribute<BitPackFormatter, bool[]>
+public sealed class BitPackFormatterAttribute
+    : MemoryPackCustomFormatterAttribute<BitPackFormatter, bool[]>
 {
     public override BitPackFormatter GetFormatter()
     {
@@ -45,18 +55,16 @@ public sealed class BitPackFormatterAttribute : MemoryPackCustomFormatterAttribu
     }
 }
 
-public sealed class BrotliFormatterAttribute : MemoryPackCustomFormatterAttribute<BrotliFormatter, byte[]>
+public sealed class BrotliFormatterAttribute(
+    System.IO.Compression.CompressionLevel compressionLevel =
+        System.IO.Compression.CompressionLevel.Fastest,
+    int window = BrotliUtils.WindowBits_Default,
+    int decompressionSizeLimit = BrotliFormatter.DefaultDecompssionSizeLimit
+) : MemoryPackCustomFormatterAttribute<BrotliFormatter, byte[]>
 {
-    public System.IO.Compression.CompressionLevel CompressionLevel { get; }
-    public int Window { get; }
-    public int DecompressionSizeLimit { get; }
-
-    public BrotliFormatterAttribute(System.IO.Compression.CompressionLevel compressionLevel = System.IO.Compression.CompressionLevel.Fastest, int window = BrotliUtils.WindowBits_Default, int decompressionSizeLimit = BrotliFormatter.DefaultDecompssionSizeLimit)
-    {
-        this.CompressionLevel = compressionLevel;
-        this.Window = window;
-        this.DecompressionSizeLimit = decompressionSizeLimit;
-    }
+    public System.IO.Compression.CompressionLevel CompressionLevel { get; } = compressionLevel;
+    public int Window { get; } = window;
+    public int DecompressionSizeLimit { get; } = decompressionSizeLimit;
 
     public override BrotliFormatter GetFormatter()
     {
@@ -64,16 +72,14 @@ public sealed class BrotliFormatterAttribute : MemoryPackCustomFormatterAttribut
     }
 }
 
-public sealed class BrotliFormatterAttribute<T> : MemoryPackCustomFormatterAttribute<BrotliFormatter<T>, T>
+public sealed class BrotliFormatterAttribute<T>(
+    System.IO.Compression.CompressionLevel compressionLevel =
+        System.IO.Compression.CompressionLevel.Fastest,
+    int window = BrotliUtils.WindowBits_Default
+) : MemoryPackCustomFormatterAttribute<BrotliFormatter<T>, T>
 {
-    public System.IO.Compression.CompressionLevel CompressionLevel { get; }
-    public int Window { get; }
-
-    public BrotliFormatterAttribute(System.IO.Compression.CompressionLevel compressionLevel = System.IO.Compression.CompressionLevel.Fastest, int window = BrotliUtils.WindowBits_Default)
-    {
-        this.CompressionLevel = compressionLevel;
-        this.Window = window;
-    }
+    public System.IO.Compression.CompressionLevel CompressionLevel { get; } = compressionLevel;
+    public int Window { get; } = window;
 
     public override BrotliFormatter<T> GetFormatter()
     {
@@ -81,18 +87,16 @@ public sealed class BrotliFormatterAttribute<T> : MemoryPackCustomFormatterAttri
     }
 }
 
-public sealed class BrotliStringFormatterAttribute : MemoryPackCustomFormatterAttribute<BrotliStringFormatter, string>
+public sealed class BrotliStringFormatterAttribute(
+    System.IO.Compression.CompressionLevel compressionLevel =
+        System.IO.Compression.CompressionLevel.Fastest,
+    int window = BrotliUtils.WindowBits_Default,
+    int decompressionSizeLimit = BrotliFormatter.DefaultDecompssionSizeLimit
+) : MemoryPackCustomFormatterAttribute<BrotliStringFormatter, string>
 {
-    public System.IO.Compression.CompressionLevel CompressionLevel { get; }
-    public int Window { get; }
-    public int DecompressionSizeLimit { get; }
-
-    public BrotliStringFormatterAttribute(System.IO.Compression.CompressionLevel compressionLevel = System.IO.Compression.CompressionLevel.Fastest, int window = BrotliUtils.WindowBits_Default, int decompressionSizeLimit = BrotliFormatter.DefaultDecompssionSizeLimit)
-    {
-        this.CompressionLevel = compressionLevel;
-        this.Window = window;
-        this.DecompressionSizeLimit = decompressionSizeLimit;
-    }
+    public System.IO.Compression.CompressionLevel CompressionLevel { get; } = compressionLevel;
+    public int Window { get; } = window;
+    public int DecompressionSizeLimit { get; } = decompressionSizeLimit;
 
     public override BrotliStringFormatter GetFormatter()
     {
@@ -100,9 +104,10 @@ public sealed class BrotliStringFormatterAttribute : MemoryPackCustomFormatterAt
     }
 }
 
-public sealed class MemoryPoolFormatterAttribute<T> : MemoryPackCustomFormatterAttribute<MemoryPoolFormatter<T>, Memory<T?>>
+public sealed class MemoryPoolFormatterAttribute<T>
+    : MemoryPackCustomFormatterAttribute<MemoryPoolFormatter<T>, Memory<T?>>
 {
-    static readonly MemoryPoolFormatter<T> formatter = new MemoryPoolFormatter<T>();
+    static readonly MemoryPoolFormatter<T> formatter = new();
 
     public override MemoryPoolFormatter<T> GetFormatter()
     {
@@ -110,9 +115,10 @@ public sealed class MemoryPoolFormatterAttribute<T> : MemoryPackCustomFormatterA
     }
 }
 
-public sealed class ReadOnlyMemoryPoolFormatterAttribute<T> : MemoryPackCustomFormatterAttribute<ReadOnlyMemoryPoolFormatter<T>, ReadOnlyMemory<T?>>
+public sealed class ReadOnlyMemoryPoolFormatterAttribute<T>
+    : MemoryPackCustomFormatterAttribute<ReadOnlyMemoryPoolFormatter<T>, ReadOnlyMemory<T?>>
 {
-    static readonly ReadOnlyMemoryPoolFormatter<T> formatter = new ReadOnlyMemoryPoolFormatter<T>();
+    static readonly ReadOnlyMemoryPoolFormatter<T> formatter = new();
 
     public override ReadOnlyMemoryPoolFormatter<T> GetFormatter()
     {

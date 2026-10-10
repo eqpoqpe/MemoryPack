@@ -13,6 +13,10 @@
         <Description>Zero encoding extreme performance binary serializer for C#.</Description>
     </PropertyGroup>
 
+    <PropertyGroup>
+      <PackageId>Universe.MemoryPack</PackageId>
+    </PropertyGroup>
+
     <ItemGroup>
         <ProjectReference Include="..\MemoryPack.Core\MemoryPack.Core.csproj" />
         <ProjectReference Include="..\MemoryPack.Generator\MemoryPack.Generator.csproj" />

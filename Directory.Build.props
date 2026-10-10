@@ -10,10 +10,10 @@
     <!-- NuGet Packaging -->
     <IsPackable>false</IsPackable>
     <PackageVersion>$(Version)</PackageVersion>
-    <Company>Cysharp</Company>
-    <Authors>Cysharp</Authors>
+    <Company>Universe</Company>
+    <Authors>Cysharp; Ryan Martin</Authors>
     <Copyright>© Cysharp, Inc.</Copyright>
-    <PackageProjectUrl>https://github.com/Cysharp/MemoryPack</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/eqpoqpe/MemoryPack</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

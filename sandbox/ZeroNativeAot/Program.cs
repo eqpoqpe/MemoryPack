@@ -108,7 +108,7 @@ internal static class Program
         var first = new Segment(bytes.AsMemory(0, 2));
         var last = first.Append(bytes.AsMemory(2));
         var sequence = new ReadOnlySequence<byte>(first, 0, last, last.Memory.Length);
-        Item? target = new Item(); var original = target;
+        Item? target = new(); var original = target;
         Require(MemoryPackSerializer.Deserialize(sequence, ref target, context.Item) == bytes.Length && ReferenceEquals(target, original), "Context sequence overwrite failed.");
         AssertItem(item, target);
         var circle = new CircularNode { Id = 5 }; circle.Next = circle;
