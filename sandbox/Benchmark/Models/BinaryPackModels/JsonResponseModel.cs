@@ -27,7 +27,8 @@ namespace BinaryPack.Models
 
         public JsonResponseModel(bool initialize)
         {
-            if (initialize) Initialize();
+            if (initialize)
+                Initialize();
         }
 
         [Key(0), Id(0), ProtoMember(1)]
@@ -80,19 +81,20 @@ namespace BinaryPack.Models
         /// <inheritdoc/>
         public bool Equals(JsonResponseModel? other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return
-                Id == other.Id &&
-                Type == other.Type &&
-                Count == other.Count &&
-                CreationTime.Equals(other.CreationTime) &&
-                UpdateTime.Equals(other.UpdateTime) &&
-                ExpirationTime.Equals(other.ExpirationTime) &&
-                PreviousPageId == other.PreviousPageId &&
-                FollowingPageId == other.FollowingPageId &&
-                ModelContainers?.Count == other.ModelContainers?.Count &&
-                ModelContainers.Zip(other.ModelContainers).All(p => p.First.Equals(p.Second));
+            if (other is null)
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return Id == other.Id
+                && Type == other.Type
+                && Count == other.Count
+                && CreationTime.Equals(other.CreationTime)
+                && UpdateTime.Equals(other.UpdateTime)
+                && ExpirationTime.Equals(other.ExpirationTime)
+                && PreviousPageId == other.PreviousPageId
+                && FollowingPageId == other.FollowingPageId
+                && ModelContainers?.Count == other.ModelContainers?.Count
+                && ModelContainers.Zip(other.ModelContainers).All(p => p.First.Equals(p.Second));
         }
     }
 
@@ -127,12 +129,13 @@ namespace BinaryPack.Models
         /// <inheritdoc/>
         public bool Equals(ApiModelContainer? other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) throw new InvalidOperationException();
-            return
-                Id?.Equals(other.Id) == true &&
-                Type?.Equals(other.Type) == true &&
-                Model?.Equals(other.Model) == true;
+            if (other is null)
+                return false;
+            if (ReferenceEquals(this, other))
+                throw new InvalidOperationException();
+            return Id?.Equals(other.Id) == true
+                && Type?.Equals(other.Type) == true
+                && Model?.Equals(other.Model) == true;
         }
     }
 
@@ -237,7 +240,6 @@ namespace BinaryPack.Models
             Title = RandomProvider.NextString(RandomProvider.NextInt(40, 120));
             if (RandomProvider.NextBool())
             {
-
                 Text = RandomProvider.NextString(RandomProvider.NextInt(80, 400));
                 Url = null;
                 HtmlContent = RandomProvider.NextString(RandomProvider.NextInt(100, 600));
@@ -263,9 +265,12 @@ namespace BinaryPack.Models
             Flag3 = RandomProvider.NextBool();
             Flag4 = RandomProvider.NextBool();
             Flag5 = RandomProvider.NextBool();
-            if (RandomProvider.NextBool()) Optional1 = RandomProvider.NextString(RandomProvider.NextInt(6, 20));
-            if (RandomProvider.NextBool()) Optional2 = RandomProvider.NextString(RandomProvider.NextInt(6, 20));
-            if (RandomProvider.NextBool()) Optional3 = RandomProvider.NextString(RandomProvider.NextInt(6, 20));
+            if (RandomProvider.NextBool())
+                Optional1 = RandomProvider.NextString(RandomProvider.NextInt(6, 20));
+            if (RandomProvider.NextBool())
+                Optional2 = RandomProvider.NextString(RandomProvider.NextInt(6, 20));
+            if (RandomProvider.NextBool())
+                Optional3 = RandomProvider.NextString(RandomProvider.NextInt(6, 20));
             if (RandomProvider.NextBool())
             {
                 Info = new MediaInfoModel();
@@ -276,37 +281,37 @@ namespace BinaryPack.Models
         /// <inheritdoc/>
         public bool Equals(RestApiModel? other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return
-                Id == other.Id &&
-                Type == other.Type &&
-                Parent == other.Parent &&
-                Author == other.Author &&
-                Title == other.Title &&
-                Text == other.Text &&
-                Url == other.Url &&
-                HtmlContent == other.HtmlContent &&
-                Upvotes == other.Upvotes &&
-                Downvotes == other.Downvotes &&
-                MathF.Abs(VotesRatio - other.VotesRatio) < 0.001f &&
-                Views == other.Views &&
-                Clicks == other.Clicks &&
-                MathF.Abs(ClicksRatio - other.ClicksRatio) < 0.001f &&
-                NumberOfComments == other.NumberOfComments &&
-                CreationTime.Equals(other.CreationTime) &&
-                UpdateTime.Equals(other.UpdateTime) &&
-                ExpirationTime.Equals(other.ExpirationTime) &&
-                Flag1 == other.Flag1 &&
-                Flag2 == other.Flag2 &&
-                Flag3 == other.Flag3 &&
-                Flag4 == other.Flag4 &&
-                Flag5 == other.Flag5 &&
-                Optional1 == other.Optional1 &&
-                Optional2 == other.Optional2 &&
-                Optional3 == other.Optional3 &&
-                (Info == null && other.Info == null ||
-                 Info?.Equals(other.Info) == true);
+            if (other is null)
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return Id == other.Id
+                && Type == other.Type
+                && Parent == other.Parent
+                && Author == other.Author
+                && Title == other.Title
+                && Text == other.Text
+                && Url == other.Url
+                && HtmlContent == other.HtmlContent
+                && Upvotes == other.Upvotes
+                && Downvotes == other.Downvotes
+                && MathF.Abs(VotesRatio - other.VotesRatio) < 0.001f
+                && Views == other.Views
+                && Clicks == other.Clicks
+                && MathF.Abs(ClicksRatio - other.ClicksRatio) < 0.001f
+                && NumberOfComments == other.NumberOfComments
+                && CreationTime.Equals(other.CreationTime)
+                && UpdateTime.Equals(other.UpdateTime)
+                && ExpirationTime.Equals(other.ExpirationTime)
+                && Flag1 == other.Flag1
+                && Flag2 == other.Flag2
+                && Flag3 == other.Flag3
+                && Flag4 == other.Flag4
+                && Flag5 == other.Flag5
+                && Optional1 == other.Optional1
+                && Optional2 == other.Optional2
+                && Optional3 == other.Optional3
+                && (Info == null && other.Info == null || Info?.Equals(other.Info) == true);
         }
     }
 
@@ -351,14 +356,15 @@ namespace BinaryPack.Models
         /// <inheritdoc/>
         public bool Equals(MediaInfoModel? other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return
-                Id?.Equals(other.Id) == true &&
-                AlbumUrl?.Equals(other.AlbumUrl) == true &&
-                Property == other.Property &&
-                Images?.Count == other.Images?.Count &&
-                Images.Zip(other.Images).All(p => p.First.Equals(p.Second));
+            if (other is null)
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return Id?.Equals(other.Id) == true
+                && AlbumUrl?.Equals(other.AlbumUrl) == true
+                && Property == other.Property
+                && Images?.Count == other.Images?.Count
+                && Images.Zip(other.Images).All(p => p.First.Equals(p.Second));
         }
     }
 
@@ -396,13 +402,14 @@ namespace BinaryPack.Models
         /// <inheritdoc/>
         public bool Equals(ImageModel? other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) throw new InvalidOperationException();
-            return
-                Url?.Equals(other.Url) == true &&
-                Width == other.Width &&
-                Height == other.Height &&
-                MathF.Abs(AspectRatio - other.AspectRatio) < 0.001f;
+            if (other is null)
+                return false;
+            if (ReferenceEquals(this, other))
+                throw new InvalidOperationException();
+            return Url?.Equals(other.Url) == true
+                && Width == other.Width
+                && Height == other.Height
+                && MathF.Abs(AspectRatio - other.AspectRatio) < 0.001f;
         }
     }
 }

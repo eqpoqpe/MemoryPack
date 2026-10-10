@@ -9,6 +9,9 @@ internal static class DiagnosticDescriptors
 {
     const string Category = "GenerateMemoryPack";
 
+    public static readonly DiagnosticDescriptor InvalidCSharpUnion = new(
+        "MEMPACK055", "Invalid C# union contract", "C# union '{0}' cannot be serialized: {1}", Category, DiagnosticSeverity.Error, true);
+
     public static readonly DiagnosticDescriptor ReservedUnionFactory = new(
         "MEMPACK054", "Reserved union factory name", "Union type '{0}' declares reserved generated member __MemoryPackCreateFormatter", Category, DiagnosticSeverity.Error, true);
 

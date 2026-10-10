@@ -4,7 +4,9 @@ namespace Benchmark.Models;
 
 public enum TestEnum
 {
-    one, two, three
+    one,
+    two,
+    three,
 }
 
 [MemoryPackable]

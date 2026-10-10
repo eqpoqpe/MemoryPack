@@ -34,6 +34,10 @@ public class BlockCopy
     [Benchmark]
     public void CopyBlockUnaligned()
     {
-        Unsafe.CopyBlockUnaligned(ref MemoryMarshal.GetArrayDataReference(dest), ref MemoryMarshal.GetArrayDataReference(buffer), (uint)buffer.Length);
+        Unsafe.CopyBlockUnaligned(
+            ref MemoryMarshal.GetArrayDataReference(dest),
+            ref MemoryMarshal.GetArrayDataReference(buffer),
+            (uint)buffer.Length
+        );
     }
 }

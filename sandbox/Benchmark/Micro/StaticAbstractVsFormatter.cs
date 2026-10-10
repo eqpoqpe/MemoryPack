@@ -1,5 +1,5 @@
-﻿using MemoryPack;
-using System.Buffers;
+﻿using System.Buffers;
+using MemoryPack;
 
 namespace Benchmark.Micro;
 
@@ -25,7 +25,7 @@ public class StaticAbstractVsFormatter
         bufferWriter.Clear();
         using var state = MemoryPackWriterOptionalStatePool.Rent(null);
         var writer = new MemoryPackWriter<ArrayBufferWriter<byte>>(ref bufferWriter, state);
-        
+
         writer.WriteValue(value); // GetFormatter<T>.Serialize(ref writer, ref value);
     }
 
@@ -55,21 +55,6 @@ public class StaticAbstractVsFormatter
         var writer = new MemoryPackWriter<ArrayBufferWriter<byte>>(ref bufferWriter, state);
         writer.WriteUnmanagedWithObjectHeader(1, value.Value);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 [MemoryPackable]
@@ -78,10 +63,8 @@ public partial class IntClass
     public int Value { get; set; }
 }
 
-
 [MemoryPackable]
 public partial class IntClass2
 {
     public int Value { get; set; }
 }
-

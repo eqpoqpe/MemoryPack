@@ -1,4 +1,11 @@
-﻿using Benchmark.BenchmarkNetUtilities;
+﻿using System;
+using System.Buffers;
+using System.IO.Pipelines;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.Json;
+using Benchmark.BenchmarkNetUtilities;
 using Benchmark.Micro;
 using Benchmark.Models;
 using BenchmarkDotNet.Attributes;
@@ -18,13 +25,6 @@ using Orleans.Serialization;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Session;
 using ProtoBuf;
-using System;
-using System.Buffers;
-using System.IO.Pipelines;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
 
 namespace Benchmark.Benchmarks;
 
@@ -65,7 +65,15 @@ public class SerializeTest<T> : SerializerTestBase<T>
         var serialize4 = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value));
         var serialize5 = MemoryPackSerializer.Serialize(value);
 
-        writer = new ArrayBufferWriter<byte>(new[] { /* serialize1, */ serialize2, serialize3, serialize4, serialize5 }.Max(x => x.Length));
+        writer = new ArrayBufferWriter<byte>(
+            new[]
+            { /* serialize1, */
+                serialize2,
+                serialize3,
+                serialize4,
+                serialize5,
+            }.Max(x => x.Length)
+        );
         jsonWriter = new Utf8JsonWriter(writer);
     }
 

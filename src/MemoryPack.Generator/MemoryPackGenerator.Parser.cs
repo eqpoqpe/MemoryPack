@@ -56,6 +56,7 @@ public partial class TypeMeta
     public bool IsValueType { get; set; }
     public bool IsUnmanagedType { get; }
     public bool IsUnion { get; }
+    public bool IsCSharpUnion { get; }
     public bool IsRecord { get; }
     public bool IsInterfaceOrAbstract { get; }
     public IMethodSymbol? Constructor { get; }
@@ -63,7 +64,7 @@ public partial class TypeMeta
     public MethodMeta[] OnSerialized { get; }
     public MethodMeta[] OnDeserializing { get; }
     public MethodMeta[] OnDeserialized { get; }
-    public (ushort Tag, INamedTypeSymbol Type)[] UnionTags { get; }
+    public (ushort Tag, ITypeSymbol Type)[] UnionTags { get; }
     public bool IsUseEmptyConstructor => Constructor == null || Constructor.Parameters.IsEmpty;
 
     public TypeMeta(INamedTypeSymbol symbol, ReferenceSymbols reference)
@@ -111,7 +112,8 @@ public partial class TypeMeta
         this.IsValueType = symbol.IsValueType;
         this.IsUnmanagedType = symbol.IsUnmanagedType;
         this.IsInterfaceOrAbstract = symbol.IsAbstract;
-        this.IsUnion = symbol.ContainsAttribute(reference.MemoryPackUnionAttribute);
+        this.IsCSharpUnion = symbol.IsCSharpUnion();
+        this.IsUnion = IsCSharpUnion || symbol.ContainsAttribute(reference.MemoryPackUnionAttribute);
         this.IsRecord = symbol.IsRecord;
         this.OnSerializing = CollectMethod(reference.MemoryPackOnSerializingAttribute, IsValueType, isReader: false);
         this.OnSerialized = CollectMethod(reference.MemoryPackOnSerializedAttribute, IsValueType, isReader: false);
@@ -123,13 +125,106 @@ public partial class TypeMeta
             this.UnionTags = symbol.GetAttributes()
                 .Where(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, reference.MemoryPackUnionAttribute))
                 .Where(x => x.ConstructorArguments.Length == 2)
-                .Select(x => ((ushort)x.ConstructorArguments[0].Value!, (INamedTypeSymbol)x.ConstructorArguments[1].Value!))
+                .Where(x => x.ConstructorArguments[1].Value is ITypeSymbol)
+                .Select(x => (Tag: (ushort)x.ConstructorArguments[0].Value!, Type: (ITypeSymbol)x.ConstructorArguments[1].Value!))
                 .ToArray();
+            if (IsCSharpUnion)
+            {
+                // Resolve typeof(Case<>) against the actual case constructor, including
+                // constructed roots visited by a serialization context.
+                var cases = symbol.InstanceConstructors.Where(x => x.DeclaredAccessibility == Accessibility.Public
+                    && x.Parameters.Length == 1 && x.Parameters[0].RefKind is RefKind.None or RefKind.In)
+                    .Select(x => x.Parameters[0].Type).ToArray();
+                this.UnionTags = UnionTags.Select(x => (x.Tag, cases.FirstOrDefault(c =>
+                    MatchesUnionCase(x.Type, c)) ?? x.Type)).ToArray();
+            }
         }
         else
         {
-            this.UnionTags = Array.Empty<(ushort, INamedTypeSymbol)>();
+            this.UnionTags = Array.Empty<(ushort, ITypeSymbol)>();
         }
+    }
+
+    static ITypeSymbol UnionPatternType(ITypeSymbol type)
+    {
+        return type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable
+            ? nullable.TypeArguments[0] : type;
+    }
+
+    static bool MatchesUnionCase(ITypeSymbol tagType, ITypeSymbol caseType)
+    {
+        return SymbolEqualityComparer.Default.Equals(tagType, caseType)
+            || tagType is INamedTypeSymbol { IsUnboundGenericType: true } named
+                && SymbolEqualityComparer.Default.Equals(named.OriginalDefinition, caseType.OriginalDefinition);
+    }
+
+    bool ValidateCSharpUnion(TypeDeclarationSyntax syntax, IGeneratorContext context)
+    {
+        var valid = true;
+        void Error(string reason)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.InvalidCSharpUnion,
+                syntax.Identifier.GetLocation(), Symbol.Name, reason));
+            valid = false;
+        }
+
+        if (GenerateType != GenerateType.Union)
+        {
+            Error("only the default GenerateType.Object is supported");
+            return false;
+        }
+        if (Symbol.IsRefLikeType)
+        {
+            Error("ref-like unions are not supported");
+            return false;
+        }
+        if (Symbol.GetTypeMembers("IUnionMembers").Length != 0)
+        {
+            Error("union member providers are not supported");
+            return false;
+        }
+        if (!Symbol.GetMembers("Value").OfType<IPropertySymbol>().Any(x => !x.IsStatic && !x.IsIndexer
+            && x.Type.SpecialType == SpecialType.System_Object && x.GetMethod?.DeclaredAccessibility == Accessibility.Public))
+        {
+            Error("a public object Value getter is required; union member providers are not supported");
+            return false;
+        }
+        var cases = Symbol.InstanceConstructors.Where(x => x.DeclaredAccessibility == Accessibility.Public
+            && x.Parameters.Length == 1 && x.Parameters[0].RefKind is RefKind.None or RefKind.In)
+            .Select(x => x.Parameters[0].Type).ToArray();
+        if (cases.Length == 0 || UnionTags.Length != cases.Length
+            || cases.Any(c => UnionTags.Count(x => SymbolEqualityComparer.Default.Equals(c, x.Type)) != 1))
+            Error("each case constructor must have exactly one explicit MemoryPackUnion tag");
+        if (UnionTags.Select(x => x.Tag).HasDuplicate())
+        {
+            context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.UnionTagDuplicate,
+                syntax.Identifier.GetLocation(), Symbol.Name));
+            valid = false;
+        }
+        foreach (var (_, type) in UnionTags)
+        {
+            var kind = MemberMeta.ParseMemberKind(null, type, reference);
+            if (kind is MemberKind.NonSerializable or MemberKind.RefLike)
+                Error($"case '{type.ToDisplayString()}' has no supported formatter");
+        }
+        // The object-backed language representation does not retain which creation
+        // overload was used. Reject cases whose runtime values can match both tags.
+        for (var i = 0; i < UnionTags.Length; i++)
+        {
+            for (var j = i + 1; j < UnionTags.Length; j++)
+            {
+                var left = UnionPatternType(UnionTags[i].Type);
+                var right = UnionPatternType(UnionTags[j].Type);
+                var compilation = (CSharpCompilation)reference.Compilation;
+                var forward = compilation.ClassifyConversion(left, right);
+                var backward = compilation.ClassifyConversion(right, left);
+                if (SymbolEqualityComparer.Default.Equals(left, right)
+                    || forward.IsReference || forward.IsBoxing || backward.IsReference || backward.IsBoxing
+                    || left.TypeKind == TypeKind.TypeParameter || right.TypeKind == TypeKind.TypeParameter)
+                    Error($"cases '{left.ToDisplayString()}' and '{right.ToDisplayString()}' overlap or cannot be proven disjoint");
+            }
+        }
+        return valid;
     }
 
     // MemoryPack choose class/struct as same rule.
@@ -236,6 +331,7 @@ public partial class TypeMeta
             context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.ReservedUnionFactory, syntax.Identifier.GetLocation(), Symbol.Name));
             noError = false;
         }
+        if (IsCSharpUnion && !unionFormatter) return ValidateCSharpUnion(syntax, context) && noError;
         if (unionFormatter) goto UNION_VALIDATIONS;
 
         if (GenerateType == GenerateType.NoGenerate) return true;
@@ -585,8 +681,8 @@ public partial class TypeMeta
                 if (Symbol.TypeKind == TypeKind.Interface)
                 {
                     // interface, check interfaces.
-                    var check = item.Type.IsGenericType
-                        ? item.Type.OriginalDefinition.AllInterfaces.Any(x => x.EqualsUnconstructedGenericType(Symbol))
+                    var check = item.Type is INamedTypeSymbol { IsGenericType: true } named
+                        ? named.OriginalDefinition.AllInterfaces.Any(x => x.EqualsUnconstructedGenericType(Symbol))
                         : item.Type.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, Symbol));
 
                     if (!check)
@@ -598,9 +694,9 @@ public partial class TypeMeta
                 else
                 {
                     // abstract type, check base.
-                    var check = item.Type.IsGenericType
-                        ? item.Type.OriginalDefinition.GetAllBaseTypes().Any(x => x.EqualsUnconstructedGenericType(Symbol))
-                        : item.Type.GetAllBaseTypes().Any(x => SymbolEqualityComparer.Default.Equals(x, Symbol));
+                    var check = item.Type is INamedTypeSymbol { IsGenericType: true } named
+                        ? named.OriginalDefinition.GetAllBaseTypes().Any(x => x.EqualsUnconstructedGenericType(Symbol))
+                        : item.Type is INamedTypeSymbol nonGeneric && nonGeneric.GetAllBaseTypes().Any(x => SymbolEqualityComparer.Default.Equals(x, Symbol));
 
                     if (!check)
                     {
@@ -762,7 +858,7 @@ partial class MemberMeta
         return location;
     }
 
-    static MemberKind ParseMemberKind(ISymbol? memberSymbol, ITypeSymbol memberType, ReferenceSymbols references)
+    internal static MemberKind ParseMemberKind(ISymbol? memberSymbol, ITypeSymbol memberType, ReferenceSymbols references)
     {
         if (memberType.SpecialType is SpecialType.System_Object or SpecialType.System_Array or SpecialType.System_Delegate or SpecialType.System_MulticastDelegate || memberType.TypeKind == TypeKind.Delegate)
         {

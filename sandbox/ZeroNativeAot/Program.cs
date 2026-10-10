@@ -40,6 +40,7 @@ internal static class Program
             ("Closed generic models", Generics),
             ("Nested collections", Collections),
             ("Union dispatch", Unions),
+            ("C# 15 unions and closed hierarchies", CSharp15Smoke.Run),
             ("Version tolerance", VersionTolerance),
             ("Buffer writer", BufferWriter),
             ("Segmented sequence", SegmentedSequence),
@@ -93,36 +94,96 @@ internal static class Program
     static void InstanceContexts()
     {
         var context = new AppSerializerContext();
-        Require(ReferenceEquals(context.Item, context.GetTypeInfo(typeof(Item))) && context.Item.Context == context, "Metadata identity/ownership changed.");
-        Require(context.GetTypeInfo(typeof(ExternalValue)) == null, "Unknown metadata was accepted.");
-        Require(MemoryPackSerializer.Deserialize(new byte[] { 255 }, context.Item) == null, "Instance null-first model failed.");
-        Require(MemoryPackSerializer.Deserialize<IEvent>(new byte[] { 255 }, context) == null, "Instance null-first union failed.");
+        Require(
+            ReferenceEquals(context.Item, context.GetTypeInfo(typeof(Item)))
+                && context.Item.Context == context,
+            "Metadata identity/ownership changed."
+        );
+        Require(
+            context.GetTypeInfo(typeof(ExternalValue)) == null,
+            "Unknown metadata was accepted."
+        );
+        Require(
+            MemoryPackSerializer.Deserialize(new byte[] { 255 }, context.Item) == null,
+            "Instance null-first model failed."
+        );
+        Require(
+            MemoryPackSerializer.Deserialize<IEvent>(new byte[] { 255 }, context) == null,
+            "Instance null-first union failed."
+        );
         var item = CreateItem();
         var bytes = MemoryPackSerializer.Serialize(item, context.Item);
-        Require(bytes.SequenceEqual(MemoryPackSerializer.Serialize(item)), "Instance context changed default bytes.");
+        Require(
+            bytes.SequenceEqual(MemoryPackSerializer.Serialize(item)),
+            "Instance context changed default bytes."
+        );
         AssertItem(item, MemoryPackSerializer.Deserialize<Item>(bytes, context));
-        AssertItem(item, (Item?)MemoryPackSerializer.Deserialize((MemoryPackTypeInfo)context.Item, bytes));
+        AssertItem(
+            item,
+            (Item?)MemoryPackSerializer.Deserialize((MemoryPackTypeInfo)context.Item, bytes)
+        );
         var buffer = new ArrayBufferWriter<byte>();
         MemoryPackSerializer.Serialize(buffer, item, context);
         Require(buffer.WrittenSpan.SequenceEqual(bytes), "Context buffer writer changed bytes.");
         var first = new Segment(bytes.AsMemory(0, 2));
         var last = first.Append(bytes.AsMemory(2));
         var sequence = new ReadOnlySequence<byte>(first, 0, last, last.Memory.Length);
-        Item? target = new(); var original = target;
-        Require(MemoryPackSerializer.Deserialize(sequence, ref target, context.Item) == bytes.Length && ReferenceEquals(target, original), "Context sequence overwrite failed.");
+        Item? target = new();
+        var original = target;
+        Require(
+            MemoryPackSerializer.Deserialize(sequence, ref target, context.Item) == bytes.Length
+                && ReferenceEquals(target, original),
+            "Context sequence overwrite failed."
+        );
         AssertItem(item, target);
-        var circle = new CircularNode { Id = 5 }; circle.Next = circle;
-        var restored = MemoryPackSerializer.Deserialize<CircularNode>(MemoryPackSerializer.Serialize(circle, context), context);
+        var circle = new CircularNode { Id = 5 };
+        circle.Next = circle;
+        var restored = MemoryPackSerializer.Deserialize<CircularNode>(
+            MemoryPackSerializer.Serialize(circle, context),
+            context
+        );
         Require(ReferenceEquals(restored, restored!.Next), "Context circular identity failed.");
         IReply<int> reply = new Reply<int> { Value = 19 };
-        Require(MemoryPackSerializer.Deserialize<IReply<int>>(MemoryPackSerializer.Serialize(reply, context), context) is Reply<int> { Value: 19 }, "Context external union failed.");
+        Require(
+            MemoryPackSerializer.Deserialize<IReply<int>>(
+                MemoryPackSerializer.Serialize(reply, context),
+                context
+            )
+                is Reply<int> { Value: 19 },
+            "Context external union failed."
+        );
         var manual = new MemoryPackTypeInfo<int>(new OffsetIntFormatter());
-        Require(MemoryPackSerializer.Serialize(7, manual).SequenceEqual(BitConverter.GetBytes(1007)), "Manual unmanaged root formatter ignored.");
-        Require(MemoryPackSerializer.Deserialize(MemoryPackSerializer.Serialize((MemoryPackTypeInfo)manual, 7), manual) == 7, "Untyped scalar metadata failed.");
-        var tuples = new NamedTupleModel { Left = ("left", 1), Right = ("right", 2), Values = [("list", 3)] };
-        var restoredTuples = MemoryPackSerializer.Deserialize<NamedTupleModel>(MemoryPackSerializer.Serialize(tuples, context), context)!;
-        Require(restoredTuples.Left == tuples.Left && restoredTuples.Right == tuples.Right && restoredTuples.Values![0] == tuples.Values[0], "Named tuple metadata identity failed.");
-        var named = MemoryPackSerializer.Deserialize(MemoryPackSerializer.Serialize(("name", 4), context.NameAndId), context.NameAndId);
+        Require(
+            MemoryPackSerializer.Serialize(7, manual).SequenceEqual(BitConverter.GetBytes(1007)),
+            "Manual unmanaged root formatter ignored."
+        );
+        Require(
+            MemoryPackSerializer.Deserialize(
+                MemoryPackSerializer.Serialize((MemoryPackTypeInfo)manual, 7),
+                manual
+            ) == 7,
+            "Untyped scalar metadata failed."
+        );
+        var tuples = new NamedTupleModel
+        {
+            Left = ("left", 1),
+            Right = ("right", 2),
+            Values = [("list", 3)],
+        };
+        var restoredTuples = MemoryPackSerializer.Deserialize<NamedTupleModel>(
+            MemoryPackSerializer.Serialize(tuples, context),
+            context
+        )!;
+        Require(
+            restoredTuples.Left == tuples.Left
+                && restoredTuples.Right == tuples.Right
+                && restoredTuples.Values![0] == tuples.Values[0],
+            "Named tuple metadata identity failed."
+        );
+        var named = MemoryPackSerializer.Deserialize(
+            MemoryPackSerializer.Serialize(("name", 4), context.NameAndId),
+            context.NameAndId
+        );
         Require(named.Name == "name" && named.Id == 4, "Named tuple root annotations changed.");
     }
 
@@ -134,23 +195,46 @@ internal static class Program
         var a = MemoryPackSerializer.Serialize(value, first);
         var b = MemoryPackSerializer.Serialize(value, second);
         Require(!a.SequenceEqual(b), "Independent context mappings were merged.");
-        Parallel.For(0, 32, i =>
+        Parallel.For(
+            0,
+            32,
+            i =>
+            {
+                var context = i % 2 == 0 ? (MemoryPackSerializerContext)first : second;
+                var bytes = MemoryPackSerializer.Serialize(value, context);
+                Require(
+                    MemoryPackSerializer.Deserialize<OverrideModel>(bytes, context)?.Items?[0].Text
+                        == "context",
+                    "Concurrent contexts leaked formatter state."
+                );
+            }
+        );
+        Require(
+            MemoryPackSerializer.Serialize(7, first).SequenceEqual(BitConverter.GetBytes(1007)),
+            "Instance scalar root override ignored."
+        );
+        Require(
+            MemoryPackSerializer.Serialize(7).SequenceEqual(BitConverter.GetBytes(7)),
+            "Instance override leaked globally."
+        );
+        try
         {
-            var context = i % 2 == 0 ? (MemoryPackSerializerContext)first : second;
-            var bytes = MemoryPackSerializer.Serialize(value, context);
-            Require(MemoryPackSerializer.Deserialize<OverrideModel>(bytes, context)?.Items?[0].Text == "context", "Concurrent contexts leaked formatter state.");
-        });
-        Require(MemoryPackSerializer.Serialize(7, first).SequenceEqual(BitConverter.GetBytes(1007)), "Instance scalar root override ignored.");
-        Require(MemoryPackSerializer.Serialize(7).SequenceEqual(BitConverter.GetBytes(7)), "Instance override leaked globally.");
-        try { MemoryPackSerializer.Serialize(value, new MissingSerializerContext()); }
+            MemoryPackSerializer.Serialize(value, new MissingSerializerContext());
+        }
         catch (MemoryPackSerializationException exception)
         {
-            Require(exception.Message.Contains(nameof(ExternalValue)), "Missing context dependency error is unclear.");
+            Require(
+                exception.Message.Contains(nameof(ExternalValue)),
+                "Missing context dependency error is unclear."
+            );
             var utf8 = new AppSerializerContext(MemoryPackSerializerOptions.Utf8);
             var utf16 = new AppSerializerContext(MemoryPackSerializerOptions.Utf16);
             var item = CreateItem();
             var bytes = MemoryPackSerializer.Serialize(item, utf8);
-            Require(!bytes.SequenceEqual(MemoryPackSerializer.Serialize(item, utf16)), "Context string options ignored.");
+            Require(
+                !bytes.SequenceEqual(MemoryPackSerializer.Serialize(item, utf16)),
+                "Context string options ignored."
+            );
             AssertItem(item, MemoryPackSerializer.Deserialize<Item>(bytes, utf8));
             return;
         }
@@ -160,16 +244,41 @@ internal static class Program
     static void ContextCollections()
     {
         var context = AppSerializerContext.Default;
-        var queue = new PriorityQueue<Item, int>(); queue.Enqueue(CreateItem(), 7);
+        var queue = new PriorityQueue<Item, int>();
+        queue.Enqueue(CreateItem(), 7);
         var bytes = MemoryPackSerializer.Serialize(queue, context);
-        AssertItem(CreateItem(), MemoryPackSerializer.Deserialize<PriorityQueue<Item, int>>(bytes, context)!.Dequeue());
-        AssertItem(CreateItem(), MemoryPackSerializer.Deserialize<PriorityQueue<Item, int>>(MemoryPackSerializer.Serialize(queue))!.Dequeue());
+        AssertItem(
+            CreateItem(),
+            MemoryPackSerializer.Deserialize<PriorityQueue<Item, int>>(bytes, context)!.Dequeue()
+        );
+        AssertItem(
+            CreateItem(),
+            MemoryPackSerializer
+                .Deserialize<PriorityQueue<Item, int>>(MemoryPackSerializer.Serialize(queue))!
+                .Dequeue()
+        );
         ILookup<string, Item> lookup = new[] { CreateItem() }.ToLookup(x => "key");
         var lookupBytes = MemoryPackSerializer.Serialize(lookup, context);
-        AssertItem(CreateItem(), MemoryPackSerializer.Deserialize<ILookup<string, Item>>(lookupBytes, context)!["key"].Single());
-        AssertItem(CreateItem(), MemoryPackSerializer.Deserialize<ILookup<string, Item>>(MemoryPackSerializer.Serialize(lookup))!["key"].Single());
+        AssertItem(
+            CreateItem(),
+            MemoryPackSerializer
+                .Deserialize<ILookup<string, Item>>(lookupBytes, context)!["key"]
+                .Single()
+        );
+        AssertItem(
+            CreateItem(),
+            MemoryPackSerializer
+                .Deserialize<ILookup<string, Item>>(MemoryPackSerializer.Serialize(lookup))!["key"]
+                .Single()
+        );
         IReadOnlyList<Item> values = new[] { CreateItem() };
-        AssertItem(CreateItem(), MemoryPackSerializer.Deserialize<IReadOnlyList<Item>>(MemoryPackSerializer.Serialize(values, context), context)![0]);
+        AssertItem(
+            CreateItem(),
+            MemoryPackSerializer.Deserialize<IReadOnlyList<Item>>(
+                MemoryPackSerializer.Serialize(values, context),
+                context
+            )![0]
+        );
     }
 
     static async Task InstanceStreamRoundTrip()
@@ -180,9 +289,16 @@ internal static class Program
         await MemoryPackSerializer.SerializeAsync(stream, item, context.Item);
         stream.Position = 0;
         AssertItem(item, await MemoryPackSerializer.DeserializeAsync<Item>(stream, context));
-        using var canceled = new CancellationTokenSource(); canceled.Cancel();
-        try { await MemoryPackSerializer.SerializeAsync(stream, item, context, canceled.Token); }
-        catch (OperationCanceledException) { return; }
+        using var canceled = new CancellationTokenSource();
+        canceled.Cancel();
+        try
+        {
+            await MemoryPackSerializer.SerializeAsync(stream, item, context, canceled.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
         throw new InvalidOperationException("Context cancellation was ignored.");
     }
 
@@ -412,9 +528,8 @@ internal static class Program
     {
         MemoryPack.Formatters.TypeFormatter.RegisterType<Item>();
         Require(
-            MemoryPackSerializer.Deserialize<Type>(
-                MemoryPackSerializer.Serialize(typeof(Item))
-            ) == typeof(Item),
+            MemoryPackSerializer.Deserialize<Type>(MemoryPackSerializer.Serialize(typeof(Item)))
+                == typeof(Item),
             "Registered type mapping failed."
         );
         Require(

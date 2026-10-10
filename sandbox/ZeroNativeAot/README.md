@@ -15,6 +15,9 @@ custom formatter attribute arguments, explicit formatter precedence, bounded
 It also verifies instance context metadata, typed/untyped root dispatch, custom
 unmanaged formatters, conflicting nested formatter mappings, context options,
 concurrency, and computed priority-queue/lookup/interface-list dependencies.
+It also checks C# 15 declaration-based unions, explicit wide tags, empty union
+values, generic case dependencies, and closed record hierarchies through both
+static registration and instance serialization contexts.
 
 Instance serialization uses generated metadata without global registration:
 

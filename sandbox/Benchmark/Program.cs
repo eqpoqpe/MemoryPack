@@ -1,4 +1,5 @@
-﻿using Benchmark.Benchmarks;
+﻿using System.Reflection;
+using Benchmark.Benchmarks;
 using Benchmark.Micro;
 using Benchmark.Models;
 using BenchmarkDotNet.Columns;
@@ -14,11 +15,11 @@ using Iced.Intel;
 using MemoryPack;
 using MemoryPack.Compression;
 using MemoryPack.Formatters;
-using System.Reflection;
 
 #if !DEBUG
 
-var config = ManualConfig.CreateMinimumViable()
+var config = ManualConfig
+    .CreateMinimumViable()
     .AddDiagnoser(MemoryDiagnoser.Default)
     // .AddColumn(StatisticColumn.OperationsPerSecond)
     //.AddExporter(DefaultExporters.Plain)
@@ -27,19 +28,14 @@ var config = ManualConfig.CreateMinimumViable()
 
 //BenchmarkSwitcher.FromAssembly(Assembly.GetEntryAssembly()!).Run(args, config);
 
-
 //BenchmarkRunner.Run<Hyper>(config, args);
 
 //BenchmarkSwitcher.FromAssembly(Assembly.GetEntryAssembly()!).RunAllJoined(config);
 
-
 // BenchmarkRunner.Run(Assembly.GetEntryAssembly()!, config, args);
-
-
 
 //BenchmarkRunner.Run<SerializeInt>(config, args);
 //BenchmarkRunner.Run<SerializeTest<MyClass>>(config, args);
-
 
 //BenchmarkRunner.Run<RawSerialize>(config, args);
 
@@ -47,13 +43,11 @@ var config = ManualConfig.CreateMinimumViable()
 
 //BenchmarkRunner.Run<ListFormatterVsDirect>(config, args);
 
-
 //BenchmarkRunner.Run<Utf16VsUtf8>(config, args);
 
 //BenchmarkRunner.Run<SerializeTest<NeuralNetworkLayerModel>>(config, args);
 
 // BenchmarkRunner.Run<DeserializeTest<NeuralNetworkLayerModel>>(config, args);
-
 
 //BenchmarkRunner.Run<StaticDictionaryFormatterCheck>(config, args);
 //BenchmarkRunner.Run<SerializeTest<JsonResponseModel>>(config, args);
@@ -66,7 +60,6 @@ var config = ManualConfig.CreateMinimumViable()
 //BenchmarkRunner.Run<Compression<JsonResponseModel>>(config, args);
 //BenchmarkRunner.Run<Compression<Vector3[]>>(config, args);
 //BenchmarkRunner.Run<Compression<NeuralNetworkLayerModel>>(config, args);
-
 
 //BenchmarkRunner.Run<GetLocalVsStaticField>(config, args);
 
@@ -93,7 +86,6 @@ var jil = new JilBenchmark<Question>();
 var bin = jil.MemoryPackSerializeUtf16();
 var q2 = MemoryPackSerializer.Deserialize<Question>(bin);
 
-
 new Hyper().Serialize();
 
 var c = new StaticDictionaryFormatterCheck();
@@ -103,9 +95,18 @@ c.DeserializeImprovement();
 c.DeserializeCurrent();
 c.DeserializeImprovement();
 
-
 var model = new JsonResponseModel(true);
-var model2 = Enumerable.Repeat(new Vector3 { X = 10.3f, Y = 40.5f, Z = 13411.3f }, 1000).ToArray();
+var model2 = Enumerable
+    .Repeat(
+        new Vector3
+        {
+            X = 10.3f,
+            Y = 40.5f,
+            Z = 13411.3f,
+        },
+        1000
+    )
+    .ToArray();
 
 using var compressor = new BrotliCompressor();
 MemoryPackSerializer.Serialize(compressor, model2);

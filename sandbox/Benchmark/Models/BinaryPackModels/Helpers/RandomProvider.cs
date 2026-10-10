@@ -44,18 +44,24 @@ namespace BinaryPack.Models.Helpers
         /// Creates a new random <see cref="DateTime"/> value
         /// </summary>
         [Pure]
-        public static DateTime NextDateTime() => DateTime.Today.AddSeconds(Random.Next(0, 31536000)).ToUniversalTime();
+        public static DateTime NextDateTime() =>
+            DateTime.Today.AddSeconds(Random.Next(0, 31536000)).ToUniversalTime();
 
-        private const string Characters = "!?\"'#$&()*+,-.0123456789:;<=>?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]_abcdefghijklmnopqrstuvwxyz{}";
+        private const string Characters =
+            "!?\"'#$&()*+,-.0123456789:;<=>?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]_abcdefghijklmnopqrstuvwxyz{}";
 
         /// <summary>
         /// Creates a new random <see langword="string"/> with a specified length
         /// </summary>
         /// <param name="length">The length of the new <see langword="string"/> to create</param>
         [Pure]
-        public static string NextString(int length) => new string((
-            from _ in Enumerable.Range(0, length)
-            let i = Random.Next(0, Characters.Length)
-            select Characters[i]).ToArray());
+        public static string NextString(int length) =>
+            new string(
+                (
+                    from _ in Enumerable.Range(0, length)
+                    let i = Random.Next(0, Characters.Length)
+                    select Characters[i]
+                ).ToArray()
+            );
     }
 }

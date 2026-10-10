@@ -21,7 +21,7 @@ public class MemoryPackController : Controller
         {
             // If you're curious about the '* 1.0' part, DM me :-)
             NullableFloat = input.NullableFloat * 1.0F,
-            NullableDouble = input.NullableDouble * 1.0D
+            NullableDouble = input.NullableDouble * 1.0D,
         };
 
         return ret;

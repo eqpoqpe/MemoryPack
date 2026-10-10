@@ -10,7 +10,6 @@ public abstract class SerializerTestBase<T>
 {
     protected T value { get; set; }
 
-
     public SerializerTestBase()
     {
         if (typeof(T) == typeof(int))
@@ -19,11 +18,32 @@ public abstract class SerializerTestBase<T>
         }
         else if (typeof(T) == typeof(Vector3[]))
         {
-            value = (T)(object)Enumerable.Repeat(new Vector3 { X = 10.3f, Y = 40.5f, Z = 13411.3f }, 1000).ToArray();
+            value = (T)
+                (object)
+                    Enumerable
+                        .Repeat(
+                            new Vector3
+                            {
+                                X = 10.3f,
+                                Y = 40.5f,
+                                Z = 13411.3f,
+                            },
+                            1000
+                        )
+                        .ToArray();
         }
         else if (typeof(T) == typeof(MyClass))
         {
-            value = (T)(object)new MyClass { X = 100, Y = 99999999, Z = 4444, FirstName = "Hoge Huga Tako", LastName = "あいうえおかきくけこ" };
+            value = (T)
+                (object)
+                    new MyClass
+                    {
+                        X = 100,
+                        Y = 99999999,
+                        Z = 4444,
+                        FirstName = "Hoge Huga Tako",
+                        LastName = "あいうえおかきくけこ",
+                    };
         }
         else if (typeof(T) == typeof(JsonResponseModel))
         {
@@ -39,7 +59,9 @@ public abstract class SerializerTestBase<T>
         }
         else
         {
-            throw new InvalidOperationException($"Type {typeof(T)} is not registered create value.");
+            throw new InvalidOperationException(
+                $"Type {typeof(T)} is not registered create value."
+            );
         }
     }
 }

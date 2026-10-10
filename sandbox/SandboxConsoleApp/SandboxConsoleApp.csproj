@@ -1,42 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- <PublishAot>true</PublishAot> -->
+  </PropertyGroup>
 
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
-        <ImplicitUsings>disable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <!-- <PublishAot>true</PublishAot> -->
-    </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="MemoryPackLogs\**" />
+    <EmbeddedResource Remove="MemoryPackLogs\**" />
+    <None Remove="MemoryPackLogs\**" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="MemoryPackLogs\**" />
-      <EmbeddedResource Remove="MemoryPackLogs\**" />
-      <None Remove="MemoryPackLogs\**" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ConsoleAppFramework" />
+    <PackageReference Include="MessagePack" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="System.IO.Pipelines" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="ConsoleAppFramework" />
-        <PackageReference Include="MessagePack" />
-        <PackageReference Include="Newtonsoft.Json" />
-        <PackageReference Include="System.IO.Pipelines" />
-    </ItemGroup>
+  <!-- output memoerypack serialization info to directory -->
+  <ItemGroup>
+    <CompilerVisibleProperty Include="MemoryPackGenerator_SerializationInfoOutputDirectory" />
+  </ItemGroup>
+  <PropertyGroup>
+    <MemoryPackGenerator_SerializationInfoOutputDirectory>$(MSBuildProjectDirectory)\MemoryPackLogs</MemoryPackGenerator_SerializationInfoOutputDirectory>
+  </PropertyGroup>
 
-    <!-- output memoerypack serialization info to directory -->
-    <ItemGroup>
-        <CompilerVisibleProperty Include="MemoryPackGenerator_SerializationInfoOutputDirectory" />
-    </ItemGroup>
-    <PropertyGroup>
-        <MemoryPackGenerator_SerializationInfoOutputDirectory>$(MSBuildProjectDirectory)\MemoryPackLogs</MemoryPackGenerator_SerializationInfoOutputDirectory>
-    </PropertyGroup>
-
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\src\MemoryPack.Core\MemoryPack.Core.csproj" />
-        <ProjectReference Include="..\..\src\MemoryPack.Generator\MemoryPack.Generator.csproj">
-            <OutputItemType>Analyzer</OutputItemType>
-            <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-        </ProjectReference>
-        <ProjectReference Include="..\..\src\MemoryPack.Streaming\MemoryPack.Streaming.csproj" />
-    </ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MemoryPack.Core\MemoryPack.Core.csproj" />
+    <ProjectReference Include="..\..\src\MemoryPack.Generator\MemoryPack.Generator.csproj">
+      <OutputItemType>Analyzer</OutputItemType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\MemoryPack.Streaming\MemoryPack.Streaming.csproj" />
+  </ItemGroup>
 </Project>

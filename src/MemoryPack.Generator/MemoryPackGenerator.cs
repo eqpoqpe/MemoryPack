@@ -74,10 +74,9 @@ public partial class MemoryPackGenerator : IIncrementalGenerator
                 predicate: static (node, token) =>
                 {
                     // search [MemoryPackable] class or struct or interface or record
-                    return (node is ClassDeclarationSyntax
-                                 or StructDeclarationSyntax
-                                 or RecordDeclarationSyntax
-                                 or InterfaceDeclarationSyntax);
+                    // TypeDeclarationSyntax also covers C# 15 union declarations on newer
+                    // compiler hosts, without raising this generator's Roslyn requirement.
+                    return node is TypeDeclarationSyntax;
                 },
                 transform: static (context, token) =>
                 {
@@ -285,6 +284,8 @@ public partial class MemoryPackGenerator : IIncrementalGenerator
 
         public bool Equals((TypeDeclarationSyntax, Compilation) x, (TypeDeclarationSyntax, Compilation) y)
         {
+            if (x.Item1.Keyword.Text == "union" || x.Item1.Modifiers.Any(m => m.Text == "closed"))
+                return x.Item1.Equals(y.Item1) && ReferenceEquals(x.Item2, y.Item2);
             return x.Item1.Equals(y.Item1);
         }
 

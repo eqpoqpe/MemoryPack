@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace SandboxWebApp.Pages;
+
 public class PrivacyModel : PageModel
 {
     private readonly ILogger<PrivacyModel> _logger;
@@ -11,8 +12,5 @@ public class PrivacyModel : PageModel
         _logger = logger;
     }
 
-    public void OnGet()
-    {
-    }
+    public void OnGet() { }
 }
-

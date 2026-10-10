@@ -1,11 +1,4 @@
-﻿using Benchmark.BenchmarkNetUtilities;
-using BenchmarkDotNet.Configs;
-using MemoryPack;
-using MemoryPack.Formatters;
-using MemoryPack.Internal;
-using Microsoft.Diagnostics.Tracing;
-using Orleans.Serialization.Buffers;
-using System;
+﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Formats.Asn1;
@@ -14,6 +7,13 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Benchmark.BenchmarkNetUtilities;
+using BenchmarkDotNet.Configs;
+using MemoryPack;
+using MemoryPack.Formatters;
+using MemoryPack.Internal;
+using Microsoft.Diagnostics.Tracing;
+using Orleans.Serialization.Buffers;
 
 namespace Benchmark.Benchmarks;
 
@@ -33,8 +33,7 @@ public class StaticDictionaryFormatterCheck
 
     public StaticDictionaryFormatterCheck()
     {
-        target = Enumerable.Range(1, 100)
-            .ToDictionary(x => x.ToString(), x => x);
+        target = Enumerable.Range(1, 100).ToDictionary(x => x.ToString(), x => x);
 
         current = new DictionaryFormatter<string, int>();
         improvement = new DictionaryFormatter2<string, int>();
@@ -85,7 +84,6 @@ public class StaticDictionaryFormatterCheck
     }
 }
 
-
 sealed class DictionaryFormatter<TKey, TValue> : MemoryPackFormatter<Dictionary<TKey, TValue?>>
     where TKey : notnull
 {
@@ -100,17 +98,17 @@ sealed class DictionaryFormatter<TKey, TValue> : MemoryPackFormatter<Dictionary<
     readonly IEqualityComparer<TKey>? equalityComparer;
 
     public DictionaryFormatter()
-        : this(null)
-    {
-
-    }
+        : this(null) { }
 
     public DictionaryFormatter(IEqualityComparer<TKey>? equalityComparer)
     {
         this.equalityComparer = equalityComparer;
     }
 
-    public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref Dictionary<TKey, TValue?>? value)
+    public override void Serialize<TBufferWriter>(
+        ref MemoryPackWriter<TBufferWriter> writer,
+        scoped ref Dictionary<TKey, TValue?>? value
+    )
     {
         if (value == null)
         {
@@ -128,7 +126,10 @@ sealed class DictionaryFormatter<TKey, TValue> : MemoryPackFormatter<Dictionary<
         }
     }
 
-    public override void Deserialize(ref MemoryPackReader reader, scoped ref Dictionary<TKey, TValue?>? value)
+    public override void Deserialize(
+        ref MemoryPackReader reader,
+        scoped ref Dictionary<TKey, TValue?>? value
+    )
     {
         if (!reader.TryReadCollectionHeader(out var length))
         {
@@ -161,24 +162,24 @@ sealed class DictionaryFormatter2<TKey, TValue> : MemoryPackFormatter<Dictionary
     readonly IEqualityComparer<TKey>? equalityComparer;
 
     public DictionaryFormatter2()
-        : this(null)
-    {
-
-    }
+        : this(null) { }
 
     public DictionaryFormatter2(IEqualityComparer<TKey>? equalityComparer)
     {
         this.equalityComparer = equalityComparer;
     }
 
-    public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref Dictionary<TKey, TValue?>? value)
+    public override void Serialize<TBufferWriter>(
+        ref MemoryPackWriter<TBufferWriter> writer,
+        scoped ref Dictionary<TKey, TValue?>? value
+    )
     {
         if (value == null)
         {
             writer.WriteNullCollectionHeader();
             return;
         }
-        
+
         var keyFormatter = writer.GetFormatter<TKey>();
         var valueFormatter = writer.GetFormatter<TValue>();
 
@@ -189,14 +190,17 @@ sealed class DictionaryFormatter2<TKey, TValue> : MemoryPackFormatter<Dictionary
         }
     }
 
-    public override void Deserialize(ref MemoryPackReader reader, scoped ref Dictionary<TKey, TValue?>? value)
+    public override void Deserialize(
+        ref MemoryPackReader reader,
+        scoped ref Dictionary<TKey, TValue?>? value
+    )
     {
         if (!reader.TryReadCollectionHeader(out var length))
         {
             value = null;
             return;
         }
-        
+
         if (value == null)
         {
             value = new Dictionary<TKey, TValue?>(length, equalityComparer);
@@ -210,7 +214,13 @@ sealed class DictionaryFormatter2<TKey, TValue> : MemoryPackFormatter<Dictionary
         var valueFormatter = reader.GetFormatter<TValue>();
         for (int i = 0; i < length; i++)
         {
-            KeyValuePairFormatter.Deserialize(keyFormatter, valueFormatter, ref reader, out var k, out var v);
+            KeyValuePairFormatter.Deserialize(
+                keyFormatter,
+                valueFormatter,
+                ref reader,
+                out var k,
+                out var v
+            );
             value.Add(k!, v);
         }
     }

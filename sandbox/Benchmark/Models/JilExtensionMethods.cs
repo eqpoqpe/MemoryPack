@@ -26,7 +26,8 @@ namespace Benchmark
             for (var i = 32; i <= 122; i++)
             {
                 var c = (char)i;
-                if (char.IsControl(c)) continue;
+                if (char.IsControl(c))
+                    continue;
 
                 cs.Add(c);
             }
@@ -37,17 +38,23 @@ namespace Benchmark
         public static bool TrueEqualsDictionary<K, V>(this Dictionary<K, V> a, Dictionary<K, V> b)
             where V : class, IGenericEquality<V>
         {
-            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null)) return true;
-            if (object.ReferenceEquals(a, null)) return false;
-            if (object.ReferenceEquals(b, null)) return false;
+            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null))
+                return true;
+            if (object.ReferenceEquals(a, null))
+                return false;
+            if (object.ReferenceEquals(b, null))
+                return false;
 
-            if (a.Count != b.Count) return false;
+            if (a.Count != b.Count)
+                return false;
 
             foreach (var kv in a)
             {
                 V bv;
-                if (!b.TryGetValue(kv.Key, out bv)) return false;
-                if (!kv.Value.TrueEquals(bv)) return false;
+                if (!b.TryGetValue(kv.Key, out bv))
+                    return false;
+                if (!kv.Value.TrueEquals(bv))
+                    return false;
             }
 
             return true;
@@ -60,18 +67,23 @@ namespace Benchmark
 
         public static bool TrueEqualsString(this IEnumerable<string> a, IEnumerable<string> b)
         {
-            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null)) return true;
-            if (object.ReferenceEquals(a, null)) return false;
-            if (object.ReferenceEquals(b, null)) return false;
+            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null))
+                return true;
+            if (object.ReferenceEquals(a, null))
+                return false;
+            if (object.ReferenceEquals(b, null))
+                return false;
 
-            if (a.Count() != b.Count()) return false;
+            if (a.Count() != b.Count())
+                return false;
 
             using (var e1 = a.GetEnumerator())
             using (var e2 = b.GetEnumerator())
             {
                 while (e1.MoveNext() && e2.MoveNext())
                 {
-                    if (!e1.Current.TrueEqualsString(e2.Current)) return false;
+                    if (!e1.Current.TrueEqualsString(e2.Current))
+                        return false;
                 }
             }
 
@@ -81,18 +93,23 @@ namespace Benchmark
         public static bool TrueEqualsList<T>(this IEnumerable<T> a, IEnumerable<T> b)
             where T : class, IGenericEquality<T>
         {
-            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null)) return true;
-            if (object.ReferenceEquals(a, null)) return false;
-            if (object.ReferenceEquals(b, null)) return false;
+            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null))
+                return true;
+            if (object.ReferenceEquals(a, null))
+                return false;
+            if (object.ReferenceEquals(b, null))
+                return false;
 
-            if (a.Count() != b.Count()) return false;
+            if (a.Count() != b.Count())
+                return false;
 
             using (var e1 = a.GetEnumerator())
             using (var e2 = b.GetEnumerator())
             {
                 while (e1.MoveNext() && e2.MoveNext())
                 {
-                    if (!e1.Current.TrueEquals(e2.Current)) return false;
+                    if (!e1.Current.TrueEquals(e2.Current))
+                        return false;
                 }
             }
 
@@ -100,13 +117,17 @@ namespace Benchmark
         }
 
         public static bool TrueEqualsListDynamic<T>(this IEnumerable<T> a, IEnumerable<dynamic> b)
-        where T : class, IGenericEquality<T>
+            where T : class, IGenericEquality<T>
         {
-            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null)) return true;
-            if (object.ReferenceEquals(a, null)) return false;
-            if (object.ReferenceEquals(b, null)) return false;
+            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null))
+                return true;
+            if (object.ReferenceEquals(a, null))
+                return false;
+            if (object.ReferenceEquals(b, null))
+                return false;
 
-            if (a.Count() != b.Count()) return false;
+            if (a.Count() != b.Count())
+                return false;
 
             using (var e1 = a.GetEnumerator())
             using (var e2 = b.GetEnumerator())
@@ -116,9 +137,12 @@ namespace Benchmark
                     var c1 = e1.Current;
                     var c2 = e2.Current;
 
-                    if (c1 == null && c2 != null) return false;
-                    if (c2 == null && c1 != null) return false;
-                    if (!c1.EqualsDynamic(c2)) return false;
+                    if (c1 == null && c2 != null)
+                        return false;
+                    if (c2 == null && c1 != null)
+                        return false;
+                    if (!c1.EqualsDynamic(c2))
+                        return false;
                 }
             }
 
@@ -135,9 +159,12 @@ namespace Benchmark
         public static bool TrueEquals<T>(this T? a, T? b)
             where T : struct
         {
-            if (!a.HasValue && !b.HasValue) return true;
-            if (!a.HasValue) return false;
-            if (!b.HasValue) return false;
+            if (!a.HasValue && !b.HasValue)
+                return true;
+            if (!a.HasValue)
+                return false;
+            if (!b.HasValue)
+                return false;
 
             return a.Value.Equals(b.Value);
         }
@@ -145,9 +172,12 @@ namespace Benchmark
         public static bool TrueEquals<T>(this T a, T b)
             where T : class, IGenericEquality<T>
         {
-            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null)) return true;
-            if (object.ReferenceEquals(a, null)) return false;
-            if (object.ReferenceEquals(b, null)) return false;
+            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null))
+                return true;
+            if (object.ReferenceEquals(a, null))
+                return false;
+            if (object.ReferenceEquals(b, null))
+                return false;
 
             return a.Equals(b);
         }
@@ -162,12 +192,11 @@ namespace Benchmark
 
         public static IEnumerable<T> Random<T>(this IEnumerable<T> enumerable, Random rand)
         {
-            return
-                enumerable
-                    .Select(i => new { i, _ = rand.Next() })
-                    .OrderBy(o => o._)
-                    .Select(o => o.i)
-                    .ToList();
+            return enumerable
+                .Select(i => new { i, _ = rand.Next() })
+                .OrderBy(o => o._)
+                .Select(o => o.i)
+                .ToList();
         }
 
         public static bool IsNullable(this Type t)
@@ -177,32 +206,36 @@ namespace Benchmark
 
         public static bool IsList(this Type t)
         {
-            return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>)) ||
-                t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
+            return (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>))
+                || t.GetInterfaces()
+                    .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
         }
 
         public static Type GetListInterface(this Type t)
         {
-            return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>)) ?
-                t :
-                t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
+            return (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>))
+                ? t
+                : t.GetInterfaces()
+                    .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
         }
 
         public static bool IsDictionary(this Type t)
         {
-            return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>)) ||
-                t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+            return (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+                || t.GetInterfaces()
+                    .Any(i =>
+                        i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>)
+                    );
         }
 
         public static Type GetDictionaryInterface(this Type t)
         {
-            return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>)) ?
-                t :
-                t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+            return (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+                ? t
+                : t.GetInterfaces()
+                    .First(i =>
+                        i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>)
+                    );
         }
 
         public static object RandomValue(this Type t, Random rand, int depth = 0)
@@ -226,7 +259,9 @@ namespace Benchmark
 
                 if (t == typeof(ushort))
                 {
-                    return (ushort)(rand.Next(ushort.MaxValue - ushort.MinValue + 1) + ushort.MinValue);
+                    return (ushort)(
+                        rand.Next(ushort.MaxValue - ushort.MinValue + 1) + ushort.MinValue
+                    );
                 }
 
                 if (t == typeof(int))
@@ -371,7 +406,8 @@ namespace Benchmark
             var retObj = Activator.CreateInstance(t);
             foreach (var p in t.GetProperties())
             {
-                if (rand.Next(2) == 0) continue;
+                if (rand.Next(2) == 0)
+                    continue;
 
                 var propType = p.PropertyType;
 
@@ -385,8 +421,10 @@ namespace Benchmark
         {
             var inOrder = e.OrderBy(_ => _).ToList();
 
-            if (inOrder.Count == 0) return 0;
-            if (inOrder.Count == 1) return inOrder[0];
+            if (inOrder.Count == 0)
+                return 0;
+            if (inOrder.Count == 1)
+                return inOrder[0];
 
             if (inOrder.Count % 2 == 1)
             {

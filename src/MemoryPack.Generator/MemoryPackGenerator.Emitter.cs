@@ -988,7 +988,9 @@ partial {{classOrStructOrRecord}} {{TypeName}}
 
     string EmitUnionTemplate(IGeneratorContext context)
     {
-        var classOrInterfaceOrRecord = IsRecord ? "record" : (Symbol.TypeKind == TypeKind.Interface) ? "interface" : "class";
+        var classOrInterfaceOrRecord = Symbol.IsUnionDeclaration() ? "union"
+            : IsRecord ? "record" : IsValueType ? "struct" : (Symbol.TypeKind == TypeKind.Interface) ? "interface" : "class";
+        var nullable = IsValueType ? "" : "?";
 
         var staticRegisterFormatterMethod = (context.IsNet7OrGreater)
             ? $"static void IMemoryPackFormatterRegister."
@@ -1028,13 +1030,13 @@ partial {{classOrInterfaceOrRecord}} {{TypeName}} : IMemoryPackFormatterRegister
     sealed class {{Symbol.Name}}Formatter : MemoryPackFormatter<{{TypeName}}>
     {
 {{EmitUnionTypeToTagField()}}
-        public override void {{serializeMethodSignarture}} writer, {{scopedRef}} {{TypeName}}? value)
+        public override void {{serializeMethodSignarture}} writer, {{scopedRef}} {{TypeName}}{{nullable}} value)
         {
 {{OnSerializing.Select(x => "            " + x.Emit()).NewLine()}}
 {{EmitUnionSerializeBody()}}
 {{OnSerialized.Select(x => "            " + x.Emit()).NewLine()}}
         }
-        public override void Deserialize(ref MemoryPackReader reader, {{scopedRef}} {{TypeName}}? value)
+        public override void Deserialize(ref MemoryPackReader reader, {{scopedRef}} {{TypeName}}{{nullable}} value)
         {
 {{OnDeserializing.Select(x => "            " + x.Emit()).NewLine()}}
 {{EmitUnionDeserializeBody()}}
@@ -1044,7 +1046,20 @@ partial {{classOrInterfaceOrRecord}} {{TypeName}} : IMemoryPackFormatterRegister
 }
 """;
 
-        return code;
+        // A nested union's generated partial must remain inside every containing type.
+        var containingDeclarations = new List<string>();
+        for (var containing = Symbol.ContainingType; containing != null; containing = containing.ContainingType)
+        {
+            var kind = containing.IsUnionDeclaration() ? "union"
+                : containing.IsRecord ? containing.IsValueType ? "record struct" : "record"
+                : containing.IsValueType ? "struct" : "class";
+            var parameters = containing.TypeParameters.Length == 0 ? ""
+                : "<" + string.Join(", ", containing.TypeParameters.Select(x => x.Name)) + ">";
+            containingDeclarations.Add($"partial {kind} {containing.Name}{parameters}\n{{");
+        }
+        containingDeclarations.Reverse();
+        return containingDeclarations.Count == 0 ? code
+            : string.Join("\n", containingDeclarations) + "\n" + code + new string('}', containingDeclarations.Count);
     }
 
     public void EmitUnionFormatterTemplate(StringBuilder writer, IGeneratorContext context, INamedTypeSymbol formatterSymbol)
@@ -1107,9 +1122,9 @@ public static class {{initializerName}}
         writer.AppendLine(code);
     }
 
-    string ToUnionTagTypeFullyQualifiedToString(INamedTypeSymbol type)
+    string ToUnionTagTypeFullyQualifiedToString(ITypeSymbol type)
     {
-        if (type.IsGenericType && this.Symbol.IsGenericType)
+        if (type is INamedTypeSymbol { IsUnboundGenericType: true } && this.Symbol.IsGenericType)
         {
             // when generic type, it is unconstructed.( typeof(T<>) ) so construct symbol's T
             var typeName = string.Join(", ", this.Symbol.TypeArguments.Select(x => x.FullyQualifiedToString()));
@@ -1123,6 +1138,7 @@ public static class {{initializerName}}
 
     string EmitUnionTypeToTagField()
     {
+        if (IsCSharpUnion) return "";
         var elements = UnionTags.Select(x => $"            {{ typeof({ToUnionTagTypeFullyQualifiedToString(x.Type)}), {x.Tag} }},").NewLine();
 
         return $$"""
@@ -1135,6 +1151,7 @@ public static class {{initializerName}}
 
     string EmitUnionSerializeBody()
     {
+        if (IsCSharpUnion) return EmitCSharpUnionSerializeBody();
         var symbolFullQualified = ToUnionTagTypeFullyQualifiedToString(Symbol);
 
         var writeBody = UnionTags
@@ -1175,6 +1192,7 @@ public static class {{initializerName}}
 
     string EmitUnionDeserializeBody()
     {
+        if (IsCSharpUnion) return EmitCSharpUnionDeserializeBody();
         var symbolFullQualified = ToUnionTagTypeFullyQualifiedToString(Symbol);
 
         var readBody = UnionTags.Select(x =>

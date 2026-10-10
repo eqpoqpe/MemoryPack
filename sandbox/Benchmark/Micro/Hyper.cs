@@ -1,11 +1,11 @@
-﻿using Benchmark.Models;
-using BenchmarkDotNet.Order;
-using MemoryPack;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Benchmark.Models;
+using BenchmarkDotNet.Order;
+using MemoryPack;
 
 namespace Benchmark.Micro;
 

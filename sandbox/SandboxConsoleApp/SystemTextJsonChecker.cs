@@ -61,11 +61,9 @@ class SystemTextJsonChecker : ConsoleAppBase
     public void PrivateSerialization()
     {
         // private field/property can not annnotate JsonInclude
-        var v = JsonSerializer.Serialize(new PrivateOK(99, 100)
-        {
-            PublicField = 1000,
-            PublicProp = 9999
-        });
+        var v = JsonSerializer.Serialize(
+            new PrivateOK(99, 100) { PublicField = 1000, PublicProp = 9999 }
+        );
         Console.WriteLine(v);
     }
 }
@@ -93,7 +91,6 @@ public class Two
 
 public class Three
 {
-
     public int X { get; }
     public int Y { get; }
 
@@ -112,7 +109,6 @@ public class Three
 
 public class Four
 {
-
     public int X { get; }
     public int Y { get; }
 
@@ -130,9 +126,6 @@ public class Four
     }
 }
 
-
-
-
 public struct Five
 {
     public int X { get; }
@@ -146,17 +139,12 @@ public struct Five
     }
 }
 
-
-
 public struct Six
 {
     public int X { get; }
     public int Y { get; }
 
-    public Six()
-    {
-
-    }
+    public Six() { }
 
     public Six(int x, int y)
     {
@@ -166,16 +154,12 @@ public struct Six
     }
 }
 
-
 public struct Seven
 {
     public int X { get; }
     public int Y { get; }
 
-    public Seven()
-    {
-
-    }
+    public Seven() { }
 
     [JsonConstructor]
     public Seven(int x, int y)
@@ -200,7 +184,6 @@ public class PrivateOK
     [JsonInclude]
     public int PrivateSetter { get; }
 
-
     // [JsonInclude]
     // int PrivateBoth { get; set; }
 
@@ -209,5 +192,4 @@ public class PrivateOK
         this.PrivateSetter = privateSetter;
         // this.PrivateBoth = privateBoth;
     }
-
 }

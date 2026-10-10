@@ -11,6 +11,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net11.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>
@@ -22,14 +23,22 @@
     the tool paths. Shell startup diagnostics can be prepended as list entries.
     Recover the final path only when it points to an installed tool.
   -->
-  <Target Name="AngelaNormalizeNativeAotToolPaths" BeforeTargets="LinkNative" DependsOnTargets="SetupOSSpecificProps" Condition="'$(PublishAot)' == 'true' and '$(_targetOS)' == 'win' and '$(IlcUseEnvironmentalTools)' != 'true'">
+  <Target
+    Name="AngelaNormalizeNativeAotToolPaths"
+    BeforeTargets="LinkNative"
+    DependsOnTargets="SetupOSSpecificProps"
+    Condition="'$(PublishAot)' == 'true' and '$(_targetOS)' == 'win' and '$(IlcUseEnvironmentalTools)' != 'true'"
+  >
     <PropertyGroup>
       <_AngelaCppLinkerCandidate>$(CppLinker.Substring($([MSBuild]::Add($(CppLinker.LastIndexOf(';')), 1))).Trim())</_AngelaCppLinkerCandidate>
       <_AngelaCppLibCreatorCandidate>$(CppLibCreator.Substring($([MSBuild]::Add($(CppLibCreator.LastIndexOf(';')), 1))).Trim())</_AngelaCppLibCreatorCandidate>
     </PropertyGroup>
     <PropertyGroup>
-      <CppLinker Condition="!Exists('$(CppLinker)') and Exists('$(_AngelaCppLinkerCandidate)')">$(_AngelaCppLinkerCandidate)</CppLinker>
-      <CppLibCreator Condition="!Exists('$(CppLibCreator)') and Exists('$(_AngelaCppLibCreatorCandidate)')">$(_AngelaCppLibCreatorCandidate)</CppLibCreator>
+      <CppLinker Condition="!Exists('$(CppLinker)') and Exists('$(_AngelaCppLinkerCandidate)')"
+        >$(_AngelaCppLinkerCandidate)</CppLinker>
+      <CppLibCreator
+        Condition="!Exists('$(CppLibCreator)') and Exists('$(_AngelaCppLibCreatorCandidate)')"
+        >$(_AngelaCppLibCreatorCandidate)</CppLibCreator>
     </PropertyGroup>
   </Target>
 </Project>

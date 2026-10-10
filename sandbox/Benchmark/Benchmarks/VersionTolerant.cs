@@ -1,12 +1,12 @@
-﻿using Benchmark.BenchmarkNetUtilities;
-using Benchmark.Models;
-using BenchmarkDotNet.Configs;
-using MemoryPack;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Benchmark.BenchmarkNetUtilities;
+using Benchmark.Models;
+using BenchmarkDotNet.Configs;
+using MemoryPack;
 
 namespace Benchmark.Benchmarks;
 
@@ -28,7 +28,7 @@ public class VersionTolerant
             Y = 332,
             Z = 942524,
             FirstName = "hogehoge",
-            LastName = "ふがふが"
+            LastName = "ふがふが",
         };
 
         value2 = new VersionTolerantMyClass
@@ -37,7 +37,7 @@ public class VersionTolerant
             Y = 332,
             Z = 942524,
             FirstName = "hogehoge",
-            LastName = "ふがふが"
+            LastName = "ふがふが",
         };
 
         serializedNormal = MemoryPackSerializer.Serialize(value1);
@@ -56,7 +56,6 @@ public class VersionTolerant
         return MemoryPackSerializer.Serialize(value2);
     }
 
-
     [Benchmark, BenchmarkCategory(Categories.Serialize)]
     public MyClass? DefaultDeserialize()
     {
@@ -69,5 +68,3 @@ public class VersionTolerant
         return MemoryPackSerializer.Deserialize<VersionTolerantMyClass>(serializedVT);
     }
 }
-
-

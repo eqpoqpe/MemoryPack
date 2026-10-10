@@ -1,15 +1,16 @@
-﻿using Benchmark.Models;
-using MemoryPack;
-using MessagePack;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Benchmark.Models;
+using MemoryPack;
+using MessagePack;
 
 namespace Benchmark.Micro;
 
 public class RawSerialize
 {
     MyClass value;
+
     [ThreadStatic]
     static byte[]? bufferCache;
 
@@ -18,7 +19,14 @@ public class RawSerialize
 
     public RawSerialize()
     {
-        value = new MyClass { X = 100, Y = 99999999, Z = 4444, FirstName = "Hoge Huga Tako", LastName = "あいうえおかきくけこ" };
+        value = new MyClass
+        {
+            X = 100,
+            Y = 99999999,
+            Z = 4444,
+            FirstName = "Hoge Huga Tako",
+            LastName = "あいうえおかきくけこ",
+        };
     }
 
     [Benchmark]
@@ -36,18 +44,26 @@ public class RawSerialize
         Unsafe.WriteUnaligned(ref Unsafe.Add(ref p, 4), value.Y);
         Unsafe.WriteUnaligned(ref Unsafe.Add(ref p, 8), value.Z);
 
-
         var f = value.FirstName!;
         var len1 = f.Length * 2;
         ref readonly var p2 = ref f.GetPinnableReference();
         Unsafe.WriteUnaligned(ref Unsafe.Add(ref p, 12), f.Length);
-        Unsafe.CopyBlockUnaligned(ref Unsafe.Add(ref p, 16), ref Unsafe.As<char, byte>(ref Unsafe.AsRef(p2)), (uint)len1);
+        Unsafe.CopyBlockUnaligned(
+            ref Unsafe.Add(ref p, 16),
+            ref Unsafe.As<char, byte>(ref Unsafe.AsRef(p2)),
+            (uint)len1
+        );
 
         var l = value.LastName!;
         var len2 = l.Length * 2;
         ref readonly var p3 = ref l.GetPinnableReference();
-        Unsafe.WriteUnaligned(ref Unsafe.Add(ref p, 16 + len1), l.Length); ;
-        Unsafe.CopyBlockUnaligned(ref Unsafe.Add(ref p, 20 + len1), ref Unsafe.As<char, byte>(ref Unsafe.AsRef(p3)), (uint)len2);
+        Unsafe.WriteUnaligned(ref Unsafe.Add(ref p, 16 + len1), l.Length);
+        ;
+        Unsafe.CopyBlockUnaligned(
+            ref Unsafe.Add(ref p, 20 + len1),
+            ref Unsafe.As<char, byte>(ref Unsafe.AsRef(p3)),
+            (uint)len2
+        );
 
         var result = GC.AllocateUninitializedArray<byte>(20 + len1 + len2);
 
@@ -72,7 +88,11 @@ public class RawSerialize
         }
 
         var state = MemoryPackWriterOptionalStatePool.Rent(null);
-        var writer = new MemoryPackWriter<ReusableLinkedArrayBufferWriter>(ref bufWriter, bufWriter.DangerousGetFirstBuffer(), state);
+        var writer = new MemoryPackWriter<ReusableLinkedArrayBufferWriter>(
+            ref bufWriter,
+            bufWriter.DangerousGetFirstBuffer(),
+            state
+        );
         try
         {
             if (value == null)
@@ -81,14 +101,12 @@ public class RawSerialize
                 goto END;
             }
 
-        //writer.WriteObjectHeader(5);
-        //writer.WriteUnmanaged(value.X, value.Y, value.Z);
-        //writer.WriteString(value.FirstName);
-        //writer.WriteString(value.LastName);
+            //writer.WriteObjectHeader(5);
+            //writer.WriteUnmanaged(value.X, value.Y, value.Z);
+            //writer.WriteString(value.FirstName);
+            //writer.WriteString(value.LastName);
 
-
-
-        END:
+            END:
             writer.Flush();
             return bufWriter.ToArrayAndReset();
         }
@@ -109,7 +127,11 @@ public class RawSerialize
         }
 
         var state = MemoryPackWriterOptionalStatePool.Rent(null);
-        var writer = new MemoryPackWriter<ReusableLinkedArrayBufferWriter>(ref bufWriter, bufWriter.DangerousGetFirstBuffer(), state);
+        var writer = new MemoryPackWriter<ReusableLinkedArrayBufferWriter>(
+            ref bufWriter,
+            bufWriter.DangerousGetFirstBuffer(),
+            state
+        );
         try
         {
             if (value == null)
@@ -119,12 +141,11 @@ public class RawSerialize
             }
 
             writer.WriteObjectHeader(5);
-        //writer.WriteUnmanaged(value.X, value.Y, value.Z);
-        //writer.WriteString(value.FirstName);
-        //writer.WriteString(value.LastName);
+            //writer.WriteUnmanaged(value.X, value.Y, value.Z);
+            //writer.WriteString(value.FirstName);
+            //writer.WriteString(value.LastName);
 
-
-        END:
+            END:
             writer.Flush();
             return bufWriter.ToArrayAndReset();
         }
@@ -145,7 +166,11 @@ public class RawSerialize
         }
 
         var state = MemoryPackWriterOptionalStatePool.Rent(null);
-        var writer = new MemoryPackWriter<ReusableLinkedArrayBufferWriter>(ref bufWriter, bufWriter.DangerousGetFirstBuffer(), state);
+        var writer = new MemoryPackWriter<ReusableLinkedArrayBufferWriter>(
+            ref bufWriter,
+            bufWriter.DangerousGetFirstBuffer(),
+            state
+        );
         try
         {
             if (value == null)
@@ -156,11 +181,10 @@ public class RawSerialize
 
             writer.WriteObjectHeader(5);
             writer.WriteUnmanaged(value.X, value.Y, value.Z);
-        //writer.WriteString(value.FirstName);
-        //writer.WriteString(value.LastName);
+            //writer.WriteString(value.FirstName);
+            //writer.WriteString(value.LastName);
 
-
-        END:
+            END:
             writer.Flush();
             return bufWriter.ToArrayAndReset();
         }
@@ -181,7 +205,11 @@ public class RawSerialize
         }
 
         var state = MemoryPackWriterOptionalStatePool.Rent(null);
-        var writer = new MemoryPackWriter<ReusableLinkedArrayBufferWriter>(ref bufWriter, bufWriter.DangerousGetFirstBuffer(), state);
+        var writer = new MemoryPackWriter<ReusableLinkedArrayBufferWriter>(
+            ref bufWriter,
+            bufWriter.DangerousGetFirstBuffer(),
+            state
+        );
         try
         {
             if (value == null)
@@ -193,10 +221,9 @@ public class RawSerialize
             writer.WriteObjectHeader(5);
             writer.WriteUnmanaged(value.X, value.Y, value.Z);
             writer.WriteString(value.FirstName);
-        //writer.WriteString(value.LastName);
+            //writer.WriteString(value.LastName);
 
-
-        END:
+            END:
             writer.Flush();
             return bufWriter.ToArrayAndReset();
         }
@@ -217,7 +244,11 @@ public class RawSerialize
         }
 
         var state = MemoryPackWriterOptionalStatePool.Rent(null);
-        var writer = new MemoryPackWriter<ReusableLinkedArrayBufferWriter>(ref bufWriter, bufWriter.DangerousGetFirstBuffer(), state);
+        var writer = new MemoryPackWriter<ReusableLinkedArrayBufferWriter>(
+            ref bufWriter,
+            bufWriter.DangerousGetFirstBuffer(),
+            state
+        );
         try
         {
             if (value == null)
@@ -231,8 +262,7 @@ public class RawSerialize
             writer.WriteString(value.FirstName);
             writer.WriteString(value.LastName);
 
-
-        END:
+            END:
             writer.Flush();
             return bufWriter.ToArrayAndReset();
         }
@@ -249,7 +279,6 @@ public class RawSerialize
         return MemoryPackSerializer.Serialize(value);
     }
 }
-
 
 internal sealed class ReusableLinkedArrayBufferWriter : IBufferWriter<byte>
 {
@@ -343,7 +372,8 @@ internal sealed class ReusableLinkedArrayBufferWriter : IBufferWriter<byte>
 
     public byte[] ToArrayAndReset()
     {
-        if (totalWritten == 0) return Array.Empty<byte>();
+        if (totalWritten == 0)
+            return Array.Empty<byte>();
 
         var result = GC.AllocateUninitializedArray<byte>(totalWritten);
         var dest = result.AsSpan();
@@ -377,12 +407,15 @@ internal sealed class ReusableLinkedArrayBufferWriter : IBufferWriter<byte>
     public void WriteToAndReset<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer)
         where TBufferWriter : IBufferWriter<byte>
     {
-        if (totalWritten == 0) return;
+        if (totalWritten == 0)
+            return;
 
         if (UseFirstBuffer)
         {
             ref var spanRef = ref writer.GetSpanReference(firstBufferWritten);
-            firstBuffer.AsSpan(0, firstBufferWritten).CopyTo(MemoryMarshal.CreateSpan(ref spanRef, firstBufferWritten));
+            firstBuffer
+                .AsSpan(0, firstBufferWritten)
+                .CopyTo(MemoryMarshal.CreateSpan(ref spanRef, firstBufferWritten));
             writer.Advance(firstBufferWritten);
         }
 
@@ -400,7 +433,9 @@ internal sealed class ReusableLinkedArrayBufferWriter : IBufferWriter<byte>
         if (!current.IsNull)
         {
             ref var spanRef = ref writer.GetSpanReference(current.WrittenCount);
-            current.WrittenBuffer.CopyTo(MemoryMarshal.CreateSpan(ref spanRef, current.WrittenCount));
+            current.WrittenBuffer.CopyTo(
+                MemoryMarshal.CreateSpan(ref spanRef, current.WrittenCount)
+            );
             writer.Advance(current.WrittenCount);
             current.Clear();
         }
@@ -412,18 +447,23 @@ internal sealed class ReusableLinkedArrayBufferWriter : IBufferWriter<byte>
 
     public async ValueTask WriteToAndResetAsync(Stream stream, CancellationToken cancellationToken)
     {
-        if (totalWritten == 0) return;
+        if (totalWritten == 0)
+            return;
 
         if (UseFirstBuffer)
         {
-            await stream.WriteAsync(firstBuffer.AsMemory(0, firstBufferWritten), cancellationToken).ConfigureAwait(false);
+            await stream
+                .WriteAsync(firstBuffer.AsMemory(0, firstBufferWritten), cancellationToken)
+                .ConfigureAwait(false);
         }
 
         if (buffers.Count > 0)
         {
             foreach (var item in buffers)
             {
-                await stream.WriteAsync(item.WrittenMemory, cancellationToken).ConfigureAwait(false);
+                await stream
+                    .WriteAsync(item.WrittenMemory, cancellationToken)
+                    .ConfigureAwait(false);
                 item.Clear(); // reset
             }
         }
@@ -449,7 +489,8 @@ internal sealed class ReusableLinkedArrayBufferWriter : IBufferWriter<byte>
 
     public void Reset()
     {
-        if (totalWritten == 0) return;
+        if (totalWritten == 0)
+            return;
         foreach (var item in CollectionsMarshal.AsSpan(buffers))
         {
             item.Clear();

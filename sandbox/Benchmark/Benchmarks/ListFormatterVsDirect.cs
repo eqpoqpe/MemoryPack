@@ -1,14 +1,14 @@
-﻿using Benchmark.BenchmarkNetUtilities;
-using Benchmark.Models;
-using MemoryPack;
-using MemoryPack.Formatters;
-using Orleans.Serialization.Buffers;
-using System;
+﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Benchmark.BenchmarkNetUtilities;
+using Benchmark.Models;
+using MemoryPack;
+using MemoryPack.Formatters;
+using Orleans.Serialization.Buffers;
 
 namespace Benchmark.Benchmarks;
 
@@ -23,8 +23,16 @@ public class ListFormatterVsDirect
 
     public ListFormatterVsDirect()
     {
-        value = Enumerable.Range(0, 100)
-            .Select(_ => new MyClass { X = 100, Y = 99999999, Z = 4444, FirstName = "Hoge Huga Tako", LastName = "あいうえおかきくけこ" })
+        value = Enumerable
+            .Range(0, 100)
+            .Select(_ => new MyClass
+            {
+                X = 100,
+                Y = 99999999,
+                Z = 4444,
+                FirstName = "Hoge Huga Tako",
+                LastName = "あいうえおかきくけこ",
+            })
             .ToList();
         bytes = MemoryPackSerializer.Serialize(value);
         formatter = new ListFormatter<MyClass>();
@@ -51,7 +59,6 @@ public class ListFormatterVsDirect
         writer.Flush();
         buffer.Clear();
     }
-
 
     [Benchmark, BenchmarkCategory(Categories.Deserialize)]
     public void DeserializeFormatter()

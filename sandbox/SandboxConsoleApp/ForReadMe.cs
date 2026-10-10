@@ -1,5 +1,4 @@
-﻿using MemoryPack;
-using System;
+﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,25 +6,19 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using MemoryPack;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Samples;
-
 
 [MemoryPackable]
 public partial class Sample2
 {
     [MemoryPackAllowSerialize]
     public NotSerializableType? NotSerializableProperty { get; set; }
-
-
 }
 
-public class NotSerializableType
-{
-
-}
-
+public class NotSerializableType { }
 
 [MemoryPackable]
 public partial class Person
@@ -65,26 +58,18 @@ public partial class Person3
     }
 }
 
+[MemoryPackable(GenerateType.Collection)]
+public partial class MyList<T> : List<T> { }
 
 [MemoryPackable(GenerateType.Collection)]
-public partial class MyList<T> : List<T>
-{
-}
-
-[MemoryPackable(GenerateType.Collection)]
-public partial class MyStringDictionary<TValue> : Dictionary<string, TValue>
-{
-
-}
+public partial class MyStringDictionary<TValue> : Dictionary<string, TValue> { }
 
 // Annotate inheritance types
 [MemoryPackable]
 [MemoryPackUnion(0, typeof(FooClass))]
 [MemoryPackUnion(249, typeof(BarClass))]
 // [MemoryPackUnion(250, typeof(BarClass), useWideTag: true)]
-public partial interface IUnionSample
-{
-}
+public partial interface IUnionSample { }
 
 [MemoryPackable]
 public partial class FooClass : IUnionSample
@@ -98,12 +83,12 @@ public partial class BarClass : IUnionSample
     public string? OPQ { get; set; }
 }
 
-
-
-
 public class Skelton : MemoryPackFormatter<Skelton>
 {
-    public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref Skelton? value)
+    public override void Serialize<TBufferWriter>(
+        ref MemoryPackWriter<TBufferWriter> writer,
+        scoped ref Skelton? value
+    )
     {
         if (value == null)
         {
@@ -126,8 +111,6 @@ public class Skelton : MemoryPackFormatter<Skelton>
     }
 }
 
-
-
 [MemoryPackable]
 public partial class Version1
 {
@@ -144,12 +127,12 @@ public partial class Version2
     public int? AddedProp { get; set; }
 }
 
-
 [MemoryPackable(SerializeLayout.Explicit)]
 public partial class SampleExplicitOrder
 {
     [MemoryPackOrder(1)]
     public int Prop1 { get; set; }
+
     [MemoryPackOrder(0)]
     public int Prop0 { get; set; }
 }
@@ -158,10 +141,7 @@ public partial class SampleExplicitOrder
 public partial class MyDictContainer
 {
     public Dictionary<int, string>? MD { get; set; }
-
-
 }
-
 
 [MemoryPackable]
 public partial class PoolModelSample : IDisposable
@@ -187,9 +167,11 @@ public partial class PoolModelSample : IDisposable
 
     public void Dispose()
     {
-        if (!usePool) return;
+        if (!usePool)
+            return;
 
-        Return(Payload); Payload = default;
+        Return(Payload);
+        Payload = default;
     }
 
     static void Return<T>(Memory<T> memory) => Return((ReadOnlyMemory<T>)memory);
@@ -198,7 +180,10 @@ public partial class PoolModelSample : IDisposable
     {
         if (MemoryMarshal.TryGetArray(memory, out var segment) && segment.Array is { Length: > 0 })
         {
-            ArrayPool<T>.Shared.Return(segment.Array, clearArray: RuntimeHelpers.IsReferenceOrContainsReferences<T>());
+            ArrayPool<T>.Shared.Return(
+                segment.Array,
+                clearArray: RuntimeHelpers.IsReferenceOrContainsReferences<T>()
+            );
         }
     }
 }

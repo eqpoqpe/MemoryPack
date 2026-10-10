@@ -1,4 +1,6 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System.Buffers;
+using System.Reflection;
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Environments;
@@ -6,10 +8,9 @@ using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using MemoryPack;
-using System.Buffers;
-using System.Reflection;
 
-var config = ManualConfig.CreateMinimumViable()
+var config = ManualConfig
+    .CreateMinimumViable()
     .AddDiagnoser(MemoryDiagnoser.Default)
     // .AddColumn(StatisticColumn.OperationsPerSecond)
     //.AddExporter(DefaultExporters.Plain)
@@ -60,6 +61,7 @@ public class Net6Net7<T>
 public partial class Sample
 {
     public int PublicField;
+
     // public readonly int PublicReadOnlyField;
     public int PublicProperty { get; set; }
     public int PrivateSetPublicProperty { get; private set; }
@@ -71,6 +73,7 @@ public partial class Sample
 
     [MemoryPackInclude]
     int privateField2;
+
     [MemoryPackInclude]
     int privateProperty2 { get; set; }
 }
@@ -79,6 +82,7 @@ public partial class Sample
 public partial class Sample2
 {
     public int PublicField;
+
     // public readonly int PublicReadOnlyField;
     public int PublicProperty { get; set; }
     public int PrivateSetPublicProperty { get; private set; }
@@ -92,6 +96,7 @@ public partial class Sample2
 
     [MemoryPackInclude]
     int privateField2;
+
     [MemoryPackInclude]
     int privateProperty2 { get; set; }
 }

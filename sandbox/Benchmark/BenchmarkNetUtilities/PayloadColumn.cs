@@ -8,9 +8,7 @@ namespace Benchmark.BenchmarkNetUtilities;
 public class PayloadColumnAttribute : ColumnConfigBaseAttribute
 {
     public PayloadColumnAttribute()
-        : base(new PayloadColumn())
-    {
-    }
+        : base(new PayloadColumn()) { }
 }
 
 public class PayloadColumn : IColumn

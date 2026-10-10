@@ -16,7 +16,8 @@ public class Utf8Decoding
     public Utf8Decoding()
     {
         // Japanese Hiragana
-        var text = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
+        var text =
+            "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
         utf8bytes = Encoding.UTF8.GetBytes(text);
         utf8length = utf8bytes.Length;
         utf16length = text.Length;
@@ -31,9 +32,13 @@ public class Utf8Decoding
     [Benchmark]
     public string Utf16LengthUtf8ToUtf16()
     {
-        return string.Create(utf16length, utf8bytes, static (dest, source) =>
-        {
-            Utf8.ToUtf16(source, dest, out var read, out var written);
-        });
+        return string.Create(
+            utf16length,
+            utf8bytes,
+            static (dest, source) =>
+            {
+                Utf8.ToUtf16(source, dest, out var read, out var written);
+            }
+        );
     }
 }

@@ -39,19 +39,19 @@ global using MemoryPack;
 
         var compilation = CSharpCompilation.Create("generatortest",
             references: references,
-            syntaxTrees: [CSharpSyntaxTree.ParseText(globalUsings, path: "GlobalUsings.cs")],
+            syntaxTrees: [CSharpSyntaxTree.ParseText(globalUsings, new CSharpParseOptions(LanguageVersion.CSharp11), path: "GlobalUsings.cs")],
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
 
         baseCompilation = compilation;
     }
 
-    public static (Compilation, ImmutableArray<Diagnostic>) RunGenerator(string source, string[]? preprocessorSymbols = null, AnalyzerConfigOptionsProvider? options = null)
+    public static (Compilation, ImmutableArray<Diagnostic>) RunGenerator(string source, string[]? preprocessorSymbols = null, AnalyzerConfigOptionsProvider? options = null, LanguageVersion languageVersion = LanguageVersion.CSharp11)
     {
         if (preprocessorSymbols == null)
         {
             preprocessorSymbols = new[] { "NET7_0_OR_GREATER" };
         }
-        var parseOptions = new CSharpParseOptions(LanguageVersion.CSharp11, preprocessorSymbols: preprocessorSymbols);
+        var parseOptions = new CSharpParseOptions(languageVersion, preprocessorSymbols: preprocessorSymbols);
 
         var driver = CSharpGeneratorDriver.Create(new MemoryPackGenerator()).WithUpdatedParseOptions(parseOptions);
         if (options != null)
@@ -59,7 +59,9 @@ global using MemoryPack;
             driver = (Microsoft.CodeAnalysis.CSharp.CSharpGeneratorDriver)driver.WithUpdatedAnalyzerConfigOptions(options);
         }
 
-        var compilation = baseCompilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(source, parseOptions));
+        var compilation = baseCompilation.RemoveAllSyntaxTrees()
+            .AddSyntaxTrees(baseCompilation.SyntaxTrees.Select(x => CSharpSyntaxTree.ParseText(x.GetText(), parseOptions, x.FilePath)))
+            .AddSyntaxTrees(CSharpSyntaxTree.ParseText(source, parseOptions));
 
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var diagnostics);
 

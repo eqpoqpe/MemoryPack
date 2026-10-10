@@ -248,8 +248,8 @@ public partial class MemoryPackGenerator
                 {
                     foreach (var (_, unionType) in meta.UnionTags)
                     {
-                        var closed = unionType.IsUnboundGenericType && model.TypeArguments.Length == unionType.Arity
-                            ? unionType.OriginalDefinition.Construct(model.TypeArguments.ToArray()) : unionType;
+                        var closed = unionType is INamedTypeSymbol { IsUnboundGenericType: true } named && model.TypeArguments.Length == named.Arity
+                            ? named.OriginalDefinition.Construct(model.TypeArguments.ToArray()) : unionType;
                         Visit(closed);
                     }
                 }

@@ -348,7 +348,7 @@ public partial class CctorSample
 
 Polymorphism (Union)
 ---
-MemoryPack supports serializing interface and abstract class objects for polymorphism serialization. In MemoryPack this feature is called Union. Only interfaces and abstracts classes are allowed to be annotated with `[MemoryPackUnion]` attributes. Unique union tags are required.
+MemoryPack supports serializing interface and abstract class objects for polymorphism serialization. In MemoryPack this feature is called Union. C# 15 closed hierarchies and C# union types also support `[MemoryPackUnion]`. Unique union tags are required.
 
 ```csharp
 // Annotate [MemoryPackable] and inheritance types with [MemoryPackUnion]
@@ -395,6 +395,40 @@ switch (reData)
 ```
 
 `tag` allows `0` ~ `65535`, it is especially efficient for less than `250`.
+
+With a C# 15 compiler and `<LangVersion>preview</LangVersion>`, a closed hierarchy uses the same explicit tags and wire format as an abstract-class union. The `closed` modifier makes the root implicitly abstract. List each concrete runtime type that can be serialized; descendants are not discovered automatically.
+
+```csharp
+[MemoryPackable]
+[MemoryPackUnion(0, typeof(Success))]
+[MemoryPackUnion(1, typeof(Failure))]
+public closed partial record Result;
+
+[MemoryPackable]
+public sealed partial record Success(int Value) : Result;
+
+[MemoryPackable]
+public sealed partial record Failure(string Message) : Result;
+```
+
+C# union declarations wrap unrelated case types. Annotate the union with `[MemoryPackable]` and give every case exactly one explicit tag:
+
+```csharp
+[MemoryPackable]
+[MemoryPackUnion(0, typeof(int))]
+[MemoryPackUnion(1, typeof(string))]
+public partial union Scalar(int, string);
+
+var bytes = MemoryPackSerializer.Serialize(new Scalar(42));
+var restored = MemoryPackSerializer.Deserialize<Scalar>(bytes);
+Console.WriteLine(restored.Value); // 42
+```
+
+The formatter writes a union tag followed by the typed case payload. Cases can use built-in formatters or generated MemoryPack formatters, including arrays and generic models. For a case such as `Success<T>`, use `typeof(Success<>)` in the tag attribute; the generator resolves its type arguments from the union's case constructor. Tags do not depend on case declaration order. Keep existing tags when reordering or adding cases, and never reuse a tag for a different case.
+
+`default(Scalar)` and a null case value use the null-union header. `Scalar?` additionally distinguishes an absent nullable value from a present, empty union. Unknown tags and truncated payloads throw `MemoryPackSerializationException`.
+
+This initial C# union support requires disjoint case types and the default generation mode. Missing or duplicate case mappings, overlapping cases, and unsupported formatters produce generator diagnostics. Custom union member providers are not supported. Serialization contexts include the union and its case dependencies for static registration and Native AOT.
 
 If an interface and derived types are in different assemblies, you can use `MemoryPackUnionFormatterAttribute` instead. Formatters are generated the way that they are automatically registered via `ModuleInitializer` in C# 9.0 and above.
 

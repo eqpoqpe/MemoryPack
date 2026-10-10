@@ -1,6 +1,6 @@
-﻿using MemoryPack;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Security.Principal;
+using MemoryPack;
 
 namespace SandboxWebApp;
 
@@ -10,7 +10,6 @@ public partial class FooBarBazDayonDattayon
 {
     public int MyProperty { get; set; }
 }
-
 
 [MemoryPackable]
 [GenerateTypeScript]
@@ -32,7 +31,6 @@ public partial class AllConvertableType
     public DateTime MyDate { get; set; }
     public NoMarkByteEnum MyEnum1 { get; set; }
     public NumberedUShortEnum MyEnum2 { get; set; }
-
 
     // nullable
     public bool? NullMyBool { get; set; }
@@ -76,11 +74,8 @@ public partial class AllConvertableType
 
 public enum NOBOU : int
 {
-    AP = 99
+    AP = 99,
 }
-
-
-
 
 [MemoryPackable]
 [GenerateTypeScript]
@@ -98,30 +93,27 @@ public partial class ArrayGenericsCheck
     public NestedObject[]? Array1 { get; set; }
     public IMogeUnion[]? Array2 { get; set; }
     public List<NoMarkByteEnum>? List1 { get; set; }
-
 }
 
 public enum NoMarkByteEnum : byte
 {
-    Apple, Orange, Grape
+    Apple,
+    Orange,
+    Grape,
 }
 
 public enum NumberedUShortEnum : ushort
 {
     Tokyo = 10,
     Chiba = 100,
-    Saitama = 1000
+    Saitama = 1000,
 }
-
-
 
 [MemoryPackable]
 [MemoryPackUnion(0, typeof(SampleUnion1))]
 [MemoryPackUnion(1, typeof(SampleUnion2))]
 [GenerateTypeScript]
-public partial interface IMogeUnion
-{
-}
+public partial interface IMogeUnion { }
 
 [MemoryPackable]
 [GenerateTypeScript]
@@ -137,7 +129,6 @@ public partial class SampleUnion2 : IMogeUnion
     public string? MyProperty { get; set; }
 }
 
-
 [MemoryPackable]
 [GenerateTypeScript]
 public partial class Subset
@@ -147,8 +138,6 @@ public partial class Subset
     public sbyte MySByte { get; set; }
     public short MyShort { get; set; }
 }
-
-
 
 // https://raw.githubusercontent.com/endel/msgpack-benchmark/master/sample-large.json
 [MemoryPackable]
@@ -169,9 +158,6 @@ public partial class SampleLarge
     public string? url { get; set; }
 }
 
-
-
-
 [MemoryPackable]
 [GenerateTypeScript]
 public partial class Person
@@ -187,9 +173,10 @@ public partial class Person
 
 public enum Gender
 {
-    Male, Female, Other
+    Male,
+    Female,
+    Other,
 }
-
 
 [MemoryPackable]
 [GenerateTypeScript]

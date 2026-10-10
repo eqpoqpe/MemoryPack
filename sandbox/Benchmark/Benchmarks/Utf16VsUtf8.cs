@@ -1,7 +1,7 @@
-﻿using Benchmark.BenchmarkNetUtilities;
+﻿using System.Net.Http;
+using Benchmark.BenchmarkNetUtilities;
 using BinaryPack.Models.Helpers;
 using MemoryPack;
-using System.Net.Http;
 
 namespace Benchmark.Benchmarks;
 
@@ -21,7 +21,8 @@ public class Utf16VsUtf8
 
     public Utf16VsUtf8()
     {
-        this.japanese = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
+        this.japanese =
+            "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
         this.ascii = "abcedfghijklmnopqrstuvwxyz0123456789";
         this.utf16Jpn = MemoryPackSerializer.Serialize(japanese, MemoryPackSerializerOptions.Utf16);
         this.utf8Jpn = MemoryPackSerializer.Serialize(japanese, MemoryPackSerializerOptions.Utf8);
@@ -29,8 +30,14 @@ public class Utf16VsUtf8
         this.utf8Ascii = MemoryPackSerializer.Serialize(ascii, MemoryPackSerializerOptions.Utf8);
 
         this.largeAscii = RandomProvider.NextString(600);
-        this.utf16LargeAscii = MemoryPackSerializer.Serialize(largeAscii, MemoryPackSerializerOptions.Utf16);
-        this.utf8LargeAscii = MemoryPackSerializer.Serialize(largeAscii, MemoryPackSerializerOptions.Utf8);
+        this.utf16LargeAscii = MemoryPackSerializer.Serialize(
+            largeAscii,
+            MemoryPackSerializerOptions.Utf16
+        );
+        this.utf8LargeAscii = MemoryPackSerializer.Serialize(
+            largeAscii,
+            MemoryPackSerializerOptions.Utf8
+        );
     }
 
     [Benchmark]

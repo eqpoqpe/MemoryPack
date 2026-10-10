@@ -1,9 +1,4 @@
-﻿using MemoryPack;
-using MemoryPack.Formatters;
-using MemoryPack.Internal;
-using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +6,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using MemoryPack;
+using MemoryPack.Formatters;
+using MemoryPack.Internal;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 
 namespace SandboxConsoleApp;
 
@@ -34,22 +34,21 @@ public partial struct FooUnman
 [MemoryPackable]
 public partial class NewProp : NewBase, IMore
 {
-    Version IMore.Description { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    Version IMore.Description
+    {
+        get => throw new NotImplementedException();
+        set => throw new NotImplementedException();
+    }
     public new string? Description { get; set; }
 
-    public NewProp()
-    {
-
-    }
+    public NewProp() { }
 }
-
 
 [MemoryPackable]
 public partial class NotNotOmu
 {
     public Guid? GUIDNULLABLE { get; set; }
 }
-
 
 [MemoryPackable]
 public partial class Mop
@@ -59,13 +58,11 @@ public partial class Mop
     public List<Suage>? SuageMan { get; set; }
 }
 
-
 [MemoryPackable]
 public partial class NotSample
 {
     [Utf8StringFormatter]
     public string? Custom1 { get; set; }
-
 }
 
 [MemoryPackable(GenerateType.CircularReference)]
@@ -73,6 +70,7 @@ public partial class Node
 {
     [MemoryPackOrder(0)]
     public Node? Parent { get; set; }
+
     [MemoryPackOrder(1)]
     public Node[]? Children { get; set; }
 }
@@ -82,6 +80,7 @@ public partial class TakoyakiY
 {
     [MemoryPackOrder(1)]
     public string? Bar { get; set; }
+
     [MemoryPackOrder(10)]
     public int Foo { get; set; }
 }
@@ -91,6 +90,7 @@ public partial class Suage
 {
     [MemoryPackOrder(0)]
     public int Prop1 { get; set; }
+
     [MemoryPackOrder(2)]
     public int Prop2 { get; set; }
 
@@ -101,21 +101,11 @@ public partial class Suage
     //}
 }
 
-
-
 [MemoryPackable(GenerateType.NoGenerate)]
-public partial class NoGen
-{
-}
+public partial class NoGen { }
 
 [MemoryPackable(GenerateType.Collection)]
-public partial class LisList : List<int>
-{
-
-}
-
-
-
+public partial class LisList : List<int> { }
 
 [MemoryPackable]
 public partial class InstantiateFromServiceProvider
@@ -123,11 +113,14 @@ public partial class InstantiateFromServiceProvider
     public int MyProperty { get; private set; }
 
     [MemoryPackOnDeserializing]
-    static void OnDeserializing(ref MemoryPackReader reader, ref InstantiateFromServiceProvider value)
+    static void OnDeserializing(
+        ref MemoryPackReader reader,
+        ref InstantiateFromServiceProvider value
+    )
     {
-        if (value != null) return;
-        value = reader.Options.ServiceProvider!.GetRequiredService<InstantiateFromServiceProvider>();
+        if (value != null)
+            return;
+        value =
+            reader.Options.ServiceProvider!.GetRequiredService<InstantiateFromServiceProvider>();
     }
 }
-
-

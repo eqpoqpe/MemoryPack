@@ -20,9 +20,11 @@ namespace BinaryPack.Models.Helpers
         /// <param name="b">The second <typeparamref name="T"/> value to compare</param>
         /// <returns><see langword="true"/> if both instances are either <see langword="null"/> or matching, <see langword="false"/> otherwise</returns>
         [Pure]
-        public static bool IsMatch<T>(T? a, T? b) where T : class, IEquatable<T>
+        public static bool IsMatch<T>(T? a, T? b)
+            where T : class, IEquatable<T>
         {
-            if (a != null && b != null) return a.Equals(b);
+            if (a != null && b != null)
+                return a.Equals(b);
             return a == null && b == null;
         }
 
@@ -34,9 +36,11 @@ namespace BinaryPack.Models.Helpers
         /// <param name="b">The second <see cref="Nullable{T}"/> value to compare</param>
         /// <returns><see langword="true"/> if both instances are either <see langword="null"/> or matching, <see langword="false"/> otherwise</returns>
         [Pure]
-        public static bool IsMatch<T>(T? a, T? b) where T : struct, IEquatable<T>
+        public static bool IsMatch<T>(T? a, T? b)
+            where T : struct, IEquatable<T>
         {
-            if (a != null && b != null) return a.Equals(b);
+            if (a != null && b != null)
+                return a.Equals(b);
             return a == null && b == null;
         }
 
@@ -48,15 +52,22 @@ namespace BinaryPack.Models.Helpers
         /// <param name="b">The second <see cref="IEnumerable{T}"/> instance</param>
         /// <returns><see langword="true"/> if both instances are either <see langword="null"/> or matching, <see langword="false"/> otherwise</returns>
         [Pure]
-        public static bool IsMatch<T>(IEnumerable<T>? a, IEnumerable<T>? b) where T : IEquatable<T>
+        public static bool IsMatch<T>(IEnumerable<T>? a, IEnumerable<T>? b)
+            where T : IEquatable<T>
         {
             if (a != null && b != null)
             {
-                if (a.Count() != b.Count()) return false;
+                if (a.Count() != b.Count())
+                    return false;
                 foreach ((T first, T second) in a.Zip(b))
                 {
-                    if (!(first != null && second != null && first.Equals(second) ||
-                          first == null && second == null)) return false;
+                    if (
+                        !(
+                            first != null && second != null && first.Equals(second)
+                            || first == null && second == null
+                        )
+                    )
+                        return false;
                 }
 
                 return true;
@@ -74,18 +85,28 @@ namespace BinaryPack.Models.Helpers
         /// <param name="b">The second <see cref="IDictionary{TKey,TValue}"/> instance</param>
         /// <returns><see langword="true"/> if both instances are either <see langword="null"/> or matching, <see langword="false"/> otherwise</returns>
         [Pure]
-        public static bool IsMatch<TKey, TValue>(IDictionary<TKey, TValue?>? a, IDictionary<TKey, TValue?>? b)
+        public static bool IsMatch<TKey, TValue>(
+            IDictionary<TKey, TValue?>? a,
+            IDictionary<TKey, TValue?>? b
+        )
             where TKey : IEquatable<TKey>
             where TValue : class, IEquatable<TValue>
         {
             if (a != null && b != null)
             {
-                if (a.Count != b.Count) return false;
+                if (a.Count != b.Count)
+                    return false;
                 foreach ((TKey k, TValue? aValue) in a)
                 {
-                    if (!b.TryGetValue(k, out TValue? bValue)) return false;
-                    if (!(aValue != null && bValue != null && aValue.Equals(bValue) ||
-                          aValue == null && bValue == null)) return false;
+                    if (!b.TryGetValue(k, out TValue? bValue))
+                        return false;
+                    if (
+                        !(
+                            aValue != null && bValue != null && aValue.Equals(bValue)
+                            || aValue == null && bValue == null
+                        )
+                    )
+                        return false;
                 }
 
                 return true;
@@ -103,18 +124,28 @@ namespace BinaryPack.Models.Helpers
         /// <param name="b">The second <see cref="IDictionary{TKey,TValue}"/> instance</param>
         /// <returns><see langword="true"/> if both instances are either <see langword="null"/> or matching, <see langword="false"/> otherwise</returns>
         [Pure]
-        public static bool IsMatch<TKey, TValue>(IDictionary<TKey, TValue?>? a, IDictionary<TKey, TValue?>? b)
+        public static bool IsMatch<TKey, TValue>(
+            IDictionary<TKey, TValue?>? a,
+            IDictionary<TKey, TValue?>? b
+        )
             where TKey : IEquatable<TKey>
             where TValue : struct, IEquatable<TValue>
         {
             if (a != null && b != null)
             {
-                if (a.Count != b.Count) return false;
+                if (a.Count != b.Count)
+                    return false;
                 foreach ((TKey k, TValue? aValue) in a)
                 {
-                    if (!b.TryGetValue(k, out TValue? bValue)) return false;
-                    if (!(aValue != null && bValue != null && aValue.Value.Equals(bValue.Value) ||
-                          aValue == null && bValue == null)) return false;
+                    if (!b.TryGetValue(k, out TValue? bValue))
+                        return false;
+                    if (
+                        !(
+                            aValue != null && bValue != null && aValue.Value.Equals(bValue.Value)
+                            || aValue == null && bValue == null
+                        )
+                    )
+                        return false;
                 }
 
                 return true;

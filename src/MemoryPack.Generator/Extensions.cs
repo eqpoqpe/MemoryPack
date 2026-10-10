@@ -149,7 +149,7 @@ internal static class Extensions
             }
         }
 
-        if (generateType == GenerateType.Object && (symbol.IsStatic || symbol.IsAbstract))
+        if (generateType == GenerateType.Object && (symbol.IsStatic || symbol.IsAbstract || symbol.IsCSharpUnion()))
         {
             // static or abstract class is Union, set as NoGenerate
             generateType = GenerateType.Union;
@@ -206,6 +206,20 @@ internal static class Extensions
     public static bool IsWillImplementMemoryPackUnion(this ITypeSymbol symbol, ReferenceSymbols references)
     {
         return symbol.IsAbstract && symbol.ContainsAttribute(references.MemoryPackUnionAttribute);
+    }
+
+    public static bool IsUnionDeclaration(this ITypeSymbol symbol)
+    {
+        // The compiler-synthesized UnionAttribute is only visible in metadata, not
+        // in GetAttributes() on source symbols. Avoid depending on new Roslyn APIs.
+        return symbol.DeclaringSyntaxReferences.Any(x =>
+            x.GetSyntax() is TypeDeclarationSyntax declaration && declaration.Keyword.Text == "union");
+    }
+
+    public static bool IsCSharpUnion(this ITypeSymbol symbol)
+    {
+        return symbol.IsUnionDeclaration() || symbol.GetAttributes().Any(x =>
+            x.AttributeClass?.ToDisplayString() == "System.Runtime.CompilerServices.UnionAttribute");
     }
 
     public static bool HasDuplicate<T>(this IEnumerable<T> source)

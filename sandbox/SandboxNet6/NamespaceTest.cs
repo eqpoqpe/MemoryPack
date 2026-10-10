@@ -1,9 +1,9 @@
-﻿using MemoryPack;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MemoryPack;
 
 namespace SandboxNet6
 {
@@ -12,5 +12,4 @@ namespace SandboxNet6
     {
         public int MyProperty { get; set; }
     }
-
 }

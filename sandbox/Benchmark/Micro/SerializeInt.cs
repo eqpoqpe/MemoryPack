@@ -1,6 +1,6 @@
-﻿using BenchmarkDotNet.Attributes;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using BenchmarkDotNet.Attributes;
 
 namespace Benchmark.Micro;
 

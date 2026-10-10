@@ -19,7 +19,9 @@ namespace BinaryPack.Models
     [MessagePackObject]
     [ProtoContract]
     [Orleans.GenerateSerializer]
-    public sealed partial class NeuralNetworkLayerModel : IInitializable, IEquatable<NeuralNetworkLayerModel>
+    public sealed partial class NeuralNetworkLayerModel
+        : IInitializable,
+            IEquatable<NeuralNetworkLayerModel>
     {
         [Key(0), Id(0), ProtoMember(1)]
         public string? Id { get; set; }
@@ -69,22 +71,30 @@ namespace BinaryPack.Models
         /// <inheritdoc/>
         public bool Equals(NeuralNetworkLayerModel? other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return
-                (Id == null && other.Id == null ||
-                 Id?.Equals(other.Id) == true) &&
-                Index == other.Index &&
-                Inputs == other.Inputs &&
-                Outputs == other.Outputs &&
-                (Weights == null && other.Weights == null ||
-                 Weights?.Length == other.Weights?.Length &&
-                 Weights?.Zip(other.Weights).All(t => MathF.Abs(t.First - t.Second) < 0.001f) == true) &&
-                (Biases == null && other.Biases == null ||
-                 Biases?.Length == other.Biases?.Length &&
-                 Biases?.Zip(other.Biases).All(t => MathF.Abs(t.First - t.Second) < 0.001f) == true) &&
-                Activation == other.Activation &&
-                LastUpdateTime.Equals(other.LastUpdateTime);
+            if (other is null)
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return (Id == null && other.Id == null || Id?.Equals(other.Id) == true)
+                && Index == other.Index
+                && Inputs == other.Inputs
+                && Outputs == other.Outputs
+                && (
+                    Weights == null && other.Weights == null
+                    || Weights?.Length == other.Weights?.Length
+                        && Weights
+                            ?.Zip(other.Weights)
+                            .All(t => MathF.Abs(t.First - t.Second) < 0.001f) == true
+                )
+                && (
+                    Biases == null && other.Biases == null
+                    || Biases?.Length == other.Biases?.Length
+                        && Biases
+                            ?.Zip(other.Biases)
+                            .All(t => MathF.Abs(t.First - t.Second) < 0.001f) == true
+                )
+                && Activation == other.Activation
+                && LastUpdateTime.Equals(other.LastUpdateTime);
         }
     }
 
@@ -93,6 +103,6 @@ namespace BinaryPack.Models
     /// </summary>
     public enum ActivationType
     {
-        Sigmoid
+        Sigmoid,
     }
 }

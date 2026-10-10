@@ -1,8 +1,4 @@
-﻿
-using MemoryPack;
+﻿using MemoryPack;
 
 [MemoryPackable]
-public partial class Stat
-{
-    
-}
+public partial class Stat { }

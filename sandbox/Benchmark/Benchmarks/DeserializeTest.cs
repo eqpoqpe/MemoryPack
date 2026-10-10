@@ -1,13 +1,4 @@
-﻿using Benchmark.BenchmarkNetUtilities;
-using Benchmark.Models;
-using BinaryPack.Models;
-using MemoryPack;
-using MessagePack;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
-using Orleans.Serialization.Buffers;
-using Orleans.Serialization.Session;
-using System;
+﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Formats.Asn1;
@@ -16,6 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Benchmark.BenchmarkNetUtilities;
+using Benchmark.Models;
+using BinaryPack.Models;
+using MemoryPack;
+using MessagePack;
+using Microsoft.Extensions.DependencyInjection;
+using Orleans.Serialization;
+using Orleans.Serialization.Buffers;
+using Orleans.Serialization.Session;
 
 namespace Benchmark.Benchmarks;
 

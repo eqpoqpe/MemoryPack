@@ -1,14 +1,12 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using MemoryPack;
 using System.Buffers;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
+using MemoryPack;
 
 // System.Buffers.IBufferWriter<byte>
 Console.WriteLine("Hello, World!");
-
 
 [MemoryPackable(GenerateType.NoGenerate)]
 public partial interface IForExternalUnion
@@ -33,17 +31,13 @@ public partial class AForTwo : IForExternalUnion
 [MemoryPackUnionFormatter(typeof(IForExternalUnion))]
 [MemoryPackUnion(0, typeof(AForOne))]
 [MemoryPackUnion(1, typeof(AForTwo))]
-public partial class ForExternalUnionFormatter
-{
-}
-
+public partial class ForExternalUnionFormatter { }
 
 [MemoryPackable]
 public partial class HelloMemoryPackable
 {
     public int MyProperty { get; set; }
 }
-
 
 [MemoryPackable]
 public partial class HelloMemoryPackable2
@@ -52,13 +46,10 @@ public partial class HelloMemoryPackable2
     // public TypeAccessException My3Property { get; set; }
 }
 
-
 [MemoryPackable]
 [MemoryPackUnion(0, typeof(FooClass))]
 [MemoryPackUnion(249, typeof(BarClass))]
-public partial interface IUnionSample
-{
-}
+public partial interface IUnionSample { }
 
 [MemoryPackable]
 public partial class FooClass : IUnionSample
@@ -72,14 +63,12 @@ public partial class BarClass : IUnionSample
     public string? OPQ { get; set; }
 }
 
-
 [MemoryPackable]
 public partial struct IncludesReferenceStruct
 {
     public int X;
     public string? Y;
 }
-
 
 [MemoryPackable]
 [MemoryPackUnion(0, typeof(GenricUnionA<>))]
@@ -88,7 +77,6 @@ public partial interface IGenericUnion<ToaruHoge>
 {
     ToaruHoge? Value { get; set; }
 }
-
 
 [MemoryPackable]
 public partial class GenricUnionA<T> : IGenericUnion<T>
@@ -103,7 +91,6 @@ public partial class GenricUnionB<T> : IGenericUnion<T>
     public T? Value { get; set; }
     public double MyProperty { get; set; }
 }
-
 
 [MemoryPackable]
 public partial struct PartialStructOne
@@ -178,8 +165,8 @@ public partial struct PartialStructOne
 //{
 //}
 
-
 public struct float2 { }
+
 public struct quaternion { }
 
 [Serializable]

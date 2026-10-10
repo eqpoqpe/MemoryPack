@@ -19,7 +19,6 @@ public class ConcurrentQueueVsStack
         }
     }
 
-
     [Benchmark(Baseline = true)]
     public void Queue()
     {
@@ -38,8 +37,5 @@ public class ConcurrentQueueVsStack
         }
     }
 
-    public class MyClass
-    {
-
-    }
+    public class MyClass { }
 }

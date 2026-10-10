@@ -1,5 +1,8 @@
 ﻿#nullable disable
 
+using System.Buffers;
+using System.Text;
+using System.Text.Json;
 using Benchmark.BenchmarkNetUtilities;
 using Benchmark.Models;
 using BenchmarkDotNet.Configs;
@@ -10,9 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Session;
-using System.Buffers;
-using System.Text;
-using System.Text.Json;
 
 namespace Benchmark.Benchmarks;
 
@@ -86,7 +86,6 @@ public class JilBenchmark<T>
         return ret;
     }
 
-
     static void ResetRand()
     {
         Rand = new Random(314159265);
@@ -147,17 +146,56 @@ public class JilBenchmark<T>
         stream.Position = 0;
         payloadJson = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value));
         payloadMemoryPack = MemoryPackSerializer.Serialize(value);
-        payloadMemoryPackUtf16 = MemoryPackSerializer.Serialize(value, MemoryPackSerializerOptions.Utf16);
+        payloadMemoryPackUtf16 = MemoryPackSerializer.Serialize(
+            value,
+            MemoryPackSerializerOptions.Utf16
+        );
 
         writer = new ArrayBufferWriter<byte>(payloadJson.Length);
         jsonWriter = new Utf8JsonWriter(writer);
 
-        payloadStreamMessagePack = new MemoryStream(payloadMessagePack, 0, payloadMessagePack.Length, writable: false, publiclyVisible: false);
-        payloadStreamMemoryPack = new MemoryStream(payloadMemoryPack, 0, payloadMemoryPack.Length, writable: false, publiclyVisible: false);
-        payloadStreamMemoryPackUtf16 = new MemoryStream(payloadMemoryPackUtf16, 0, payloadMemoryPackUtf16.Length, writable: false, publiclyVisible: false);
-        payloadStreamProtobuf = new MemoryStream(payloadProtobuf, 0, payloadProtobuf.Length, writable: false, publiclyVisible: false);
-        payloadStreamJson = new MemoryStream(payloadJson, 0, payloadJson.Length, writable: false, publiclyVisible: false);
-        payloadStreamOrleans = new MemoryStream(payloadOrleans, 0, payloadOrleans.Length, writable: false, publiclyVisible: false);
+        payloadStreamMessagePack = new MemoryStream(
+            payloadMessagePack,
+            0,
+            payloadMessagePack.Length,
+            writable: false,
+            publiclyVisible: false
+        );
+        payloadStreamMemoryPack = new MemoryStream(
+            payloadMemoryPack,
+            0,
+            payloadMemoryPack.Length,
+            writable: false,
+            publiclyVisible: false
+        );
+        payloadStreamMemoryPackUtf16 = new MemoryStream(
+            payloadMemoryPackUtf16,
+            0,
+            payloadMemoryPackUtf16.Length,
+            writable: false,
+            publiclyVisible: false
+        );
+        payloadStreamProtobuf = new MemoryStream(
+            payloadProtobuf,
+            0,
+            payloadProtobuf.Length,
+            writable: false,
+            publiclyVisible: false
+        );
+        payloadStreamJson = new MemoryStream(
+            payloadJson,
+            0,
+            payloadJson.Length,
+            writable: false,
+            publiclyVisible: false
+        );
+        payloadStreamOrleans = new MemoryStream(
+            payloadOrleans,
+            0,
+            payloadOrleans.Length,
+            writable: false,
+            publiclyVisible: false
+        );
     }
 
     [Benchmark, BenchmarkCategory(Categories.Serialize, Categories.Bytes)]
@@ -281,14 +319,20 @@ public class JilBenchmark<T>
     [Benchmark, BenchmarkCategory(Categories.Serialize, Categories.Stream)]
     public void MemoryPackStream()
     {
-        MemoryPackSerializer.SerializeAsync(stream, value, MemoryPackSerializerOptions.Default).GetAwaiter().GetResult();
+        MemoryPackSerializer
+            .SerializeAsync(stream, value, MemoryPackSerializerOptions.Default)
+            .GetAwaiter()
+            .GetResult();
         stream.Position = 0;
     }
 
     [Benchmark, BenchmarkCategory(Categories.Serialize, Categories.Stream)]
     public void MemoryPackStreamUtf16()
     {
-        MemoryPackSerializer.SerializeAsync(stream, value, MemoryPackSerializerOptions.Utf16).GetAwaiter().GetResult();
+        MemoryPackSerializer
+            .SerializeAsync(stream, value, MemoryPackSerializerOptions.Utf16)
+            .GetAwaiter()
+            .GetResult();
         stream.Position = 0;
     }
 
@@ -372,21 +416,30 @@ public class JilBenchmark<T>
     public T MessagePackDeserializeStream()
     {
         payloadStreamMessagePack.Position = 0;
-        return MessagePackSerializer.DeserializeAsync<T>(payloadStreamMessagePack).GetAwaiter().GetResult();
+        return MessagePackSerializer
+            .DeserializeAsync<T>(payloadStreamMessagePack)
+            .GetAwaiter()
+            .GetResult();
     }
 
     [Benchmark, BenchmarkCategory(Categories.Deserialize, Categories.Stream)]
     public T MemoryPackDeserializeStream()
     {
         payloadStreamMemoryPack.Position = 0;
-        return MemoryPackSerializer.DeserializeAsync<T>(payloadStreamMemoryPack).GetAwaiter().GetResult();
+        return MemoryPackSerializer
+            .DeserializeAsync<T>(payloadStreamMemoryPack)
+            .GetAwaiter()
+            .GetResult();
     }
 
     [Benchmark, BenchmarkCategory(Categories.Deserialize, Categories.Stream)]
     public T MemoryPackDeserializeStreamUtf16()
     {
         payloadStreamMemoryPackUtf16.Position = 0;
-        return MemoryPackSerializer.DeserializeAsync<T>(payloadStreamMemoryPackUtf16).GetAwaiter().GetResult();
+        return MemoryPackSerializer
+            .DeserializeAsync<T>(payloadStreamMemoryPackUtf16)
+            .GetAwaiter()
+            .GetResult();
     }
 
     [Benchmark, BenchmarkCategory(Categories.Deserialize, Categories.Stream)]
@@ -400,7 +453,10 @@ public class JilBenchmark<T>
     public T SystemTextJsonDeserializeStream()
     {
         payloadStreamJson.Position = 0;
-        return System.Text.Json.JsonSerializer.DeserializeAsync<T>(payloadStreamJson).GetAwaiter().GetResult();
+        return System
+            .Text.Json.JsonSerializer.DeserializeAsync<T>(payloadStreamJson)
+            .GetAwaiter()
+            .GetResult();
     }
 
     [Benchmark, BenchmarkCategory(Categories.Deserialize, Categories.Stream)]

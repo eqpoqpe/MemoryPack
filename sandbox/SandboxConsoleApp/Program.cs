@@ -3,13 +3,6 @@
 #pragma warning disable CS8602
 #pragma warning disable CS8618
 
-using MemoryPack;
-using MemoryPack.Compression;
-using MemoryPack.Formatters;
-using MemoryPack.Streaming;
-using Microsoft.Extensions.DependencyInjection;
-using Samples;
-using SandboxConsoleApp;
 using System;
 using System.Buffers;
 using System.Collections;
@@ -17,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.IO.Pipelines;
@@ -24,13 +18,18 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml.Linq;
-
 using MemoryPack;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
+using MemoryPack;
+using MemoryPack.Compression;
+using MemoryPack.Formatters;
+using MemoryPack.Streaming;
+using Microsoft.Extensions.DependencyInjection;
+using Samples;
+using SandboxConsoleApp;
 
 CollectionTest sourceCollection = new CollectionTest();
 sourceCollection.Collection.Add("1234");
@@ -41,13 +40,9 @@ MemoryPackSerializer.Serialize(bufferPipe.Writer, sourceCollection);
 _ = await bufferPipe.Writer.FlushAsync().ConfigureAwait(false);
 ReadResult resultBuffer = await bufferPipe.Reader.ReadAsync().ConfigureAwait(false);
 
-
 //var newSource = new CollectionTest();
 var newSource = MemoryPackSerializer.Deserialize<CollectionTest>(resultBuffer.Buffer);
 Console.WriteLine(newSource.Collection.Count);
-
-
-
 
 [MemoryPackable]
 public partial class Region
@@ -57,6 +52,7 @@ public partial class Region
     public int positionZ;
     public Dictionary<Vector3, Chunk> chunks;
 }
+
 [MemoryPackable]
 public partial class Chunk
 {
@@ -67,10 +63,13 @@ public partial class Chunk
     public List<Brush> brushes;
     public Dictionary<ByteVector3, int> brushBBPositions;
 }
+
 [MemoryPackable]
 public partial class ByteVector3
 {
-    public byte x, y, z;
+    public byte x,
+        y,
+        z;
 
     public override bool Equals(object obj)
     {
@@ -86,11 +85,13 @@ public partial class ByteVector3
         // Check if all components are equal.
         return x == other.x && y == other.y && z == other.z;
     }
+
     public override int GetHashCode()
     {
         return System.HashCode.Combine(x, y, z);
     }
 }
+
 [MemoryPackable]
 public partial class Brush
 {
@@ -99,7 +100,6 @@ public partial class Brush
     public bool hiddenFlag;
     public bool borderFlag;
 }
-
 
 [MemoryPackable]
 public partial class CollectionTest
@@ -120,7 +120,6 @@ public partial record MemPackTestObj
     public DateTime Date { get; set; }
     public string Name { get; set; }
 }
-
 
 [MemoryPackable]
 public partial class CctorSample
@@ -149,68 +148,41 @@ public partial class IntClass2
     public int Value { get; set; }
 }
 
-
-
 [MemoryPackable]
 public partial struct BrotliValue<T>
 {
     public long Value { get; set; }
 }
 
-
-
-
-
 //var arrayBufferWriter = new ArrayBufferWriter<byte>();
-
-
-
 
 //var writer = new ArrayBufferWriter<byte>();
 //var seq = new ReadOnlySequence<byte>(Encoding.UTF8.GetBytes("hogehogehugahugahage"));
-
-
 
 // PipeWriter.Create(
 //PipeWriter.Create().AsStream();
 //Write(seq, writer);
 
-
-
-
-
 //var compressed = writer.WrittenMemory;
 
 //var stream = new BrotliStream(new MemoryStream(compressed.ToArray()), CompressionMode.Decompress, false);
 
-
-
-
-
 //var dest = new byte[1024];
 
-
 //var len = stream.Read(dest);
-
 
 //var len2 = stream.Read(dest);
 
 //var ok = BrotliDecoder.TryDecompress(compressed.Span, dest, out var written);
-
 
 //var seq2 = new ReadOnlySequence<byte>(compressed);
 
 //var writer2 = new ArrayBufferWriter<byte>();
 //Read(seq2, writer2);
 
-
-
-
 //MemoryPackSerializer.Serialize(brotli, "hogehogehugahuga", MemoryPackSerializeOptions.Default);
 
-
 //var foobarbaz = brotli.ToArray();
-
 
 //var dest2 = new byte[10];
 
@@ -221,80 +193,52 @@ public partial struct BrotliValue<T>
 //    status = decoder.Decompress(tako, dest2, out var consumed, out var written);
 //}
 
-
 //Console.WriteLine(status);
 //var status = BrotliDecoder.TryDecompress(tako, dest2, out var written2);
 //Console.WriteLine(status + ":" + written2);
 
 //var hogehoge = dest2.AsMemory(0, written2);
 
-
 //var tako2 = MemoryPackSerializer.Deserialize<string>(hogehoge.Span);
 
 //Console.WriteLine(foobarbaz.SequenceEqual(tako));
 
-
 //BrotliCompression.
-
-
-
-
-
 
 //var decoder = new BrotliDecoder();
 
 //decoder.Decompress(
-
 
 //public class DecompressReadOnlySequence
 //{
 //    ReadOnlySequence<byte> buffer;
 //    BrotliDecoder decoder;
 
-
 //    public DecompressReadOnlySequence()
 //    {
 //        // buffer.FirstSpan.
-
 
 //        BrotliEncoder.GetMaxCompressedLength
 
 //        //decoder.Decompress(
 
-
 //    }
 
 //}
-
-
 
 //brotli.Dispose();
 
 //var written = arrayBufferWriter.WrittenMemory;
 
-
-
 //new BrotliStream(
-
-
-
-
 
 //BrotliDecoder.TryDecompress(written,
 
-
-
-
 //// new BrotliDecoder().Decompress(
-
 
 ////encoder.Compress(, , , , true);
 
-
-
-
 //encoder.Dispose();
-
 
 [MemoryPackable]
 [GenerateTypeScript]
@@ -325,28 +269,25 @@ public partial class FooBarBaz
     //public Hoge? MyProperty3 { get; set; }
 }
 
-
 public enum Hoge : sbyte
 {
     Huga,
     Yo,
-    SOSOSO
+    SOSOSO,
 }
 
 public enum Huga : int
 {
     ZZZ = 10,
     NONUM,
-    HOKEPON
+    HOKEPON,
 }
 
 [MemoryPackable]
 [MemoryPackUnion(0, typeof(SampleUnion1))]
 [MemoryPackUnion(1, typeof(SampleUnion2))]
 [GenerateTypeScript]
-public partial interface IMogeUnion
-{
-}
+public partial interface IMogeUnion { }
 
 [MemoryPackable]
 [GenerateTypeScript]
@@ -360,9 +301,7 @@ public partial class SampleUnion1 : IMogeUnion
 public partial class SampleUnion2 : IMogeUnion
 {
     public string? MyProperty { get; set; }
-
 }
-
 
 [MemoryPackable(GenerateType.Object)]
 [GenerateTypeScript]
@@ -372,10 +311,7 @@ public partial class Sonota1
     public int HokuHoku { get; set; }
 }
 
-public class NoSerializableObject
-{
-
-}
+public class NoSerializableObject { }
 
 [MemoryPackable(SerializeLayout.Explicit)]
 [GenerateTypeScript]
@@ -383,6 +319,7 @@ public partial class Sonota2
 {
     [MemoryPackOrder(1)]
     public int MyProperty1 { get; set; }
+
     [MemoryPackOrder(0)]
     public int MyProperty2 { get; set; }
 }
@@ -393,9 +330,6 @@ public partial class Sonota3
     [MemoryPackOrder(0)]
     public int MyProperty { get; set; }
 }
-
-
-
 
 //var person = new Person();
 //var bin = MemoryPackSerializer.Serialize(person);
@@ -425,7 +359,6 @@ public partial class Sonota3
 //    }
 //}
 
-
 //internal static partial class BrotliUtils
 //{
 //    public const int WindowBits_Min = 10;
@@ -447,11 +380,8 @@ public partial class Sonota3
 //        };
 //}
 
-
 [MemoryPackable(GenerateType.Collection)]
-public partial class ListGenerics<T> : List<T>
-{
-}
+public partial class ListGenerics<T> : List<T> { }
 
 [MemoryPackable]
 public partial class Person
@@ -460,7 +390,6 @@ public partial class Person
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
 }
-
 
 [MemoryPackable]
 public partial record struct FooStruct(int x, int y);
@@ -473,16 +402,10 @@ public partial class Nu
 
 [MemoryPackable]
 [MemoryPackUnion(0, typeof(A))]
-public partial interface UnionType
-{
-
-}
+public partial interface UnionType { }
 
 [MemoryPackable]
-public partial class A : UnionType
-{
-
-}
+public partial class A : UnionType { }
 
 [MemoryPackable]
 public partial class Foo
@@ -499,20 +422,18 @@ public partial class Foo
     //}
 }
 
-
 [MemoryPackable]
 public partial class MonoMono
 {
     public FooBarFruit Yey { get; set; } = default!;
 }
 
-
 public enum FooBarFruit
 {
-    APple, orange, grape
+    APple,
+    orange,
+    grape,
 }
-
-
 
 #pragma warning disable CS8618
 [MemoryPackable]
@@ -528,6 +449,7 @@ public partial class HogeHoge
     public int[,] P8;
     public int[,,] P9;
     public int[,,,] P10;
+
     // ng
     // public int[,,,,] A5;
 
@@ -535,6 +457,7 @@ public partial class HogeHoge
     public KeyValuePair<int, int> P11;
     public Lazy<int> P12;
     public Nullable<int> P13;
+
     // collecition
     public ArraySegment<int> P14;
     public Memory<int> P15;
@@ -565,6 +488,7 @@ public partial class HogeHoge
     public ImmutableQueue<int> P38;
     public ImmutableStack<int> P39;
     public ImmutableDictionary<int, int> P40;
+
     // public ImmutableSortedDictionary<int, int> P41;
     public ImmutableSortedSet<int> P42;
     public ImmutableHashSet<int> P43;
@@ -588,11 +512,11 @@ public partial class HogeHoge
     // tuples
     public Tuple<int, string, int> T3;
     public ValueTuple<int, string, int> VT3;
+
     // more
     public Nullable<MyStruct> N1;
     public KeyValuePair<string, string> N2;
 }
-
 
 [MemoryPackable]
 public partial struct MyStruct
@@ -600,36 +524,21 @@ public partial struct MyStruct
     public string? V;
 }
 
+[MemoryPackable(GenerateType.Collection)]
+public partial class ListInt : List<int> { }
 
 [MemoryPackable(GenerateType.Collection)]
-public partial class ListInt : List<int>
-{
-
-}
+public partial class SetInt : HashSet<int> { }
 
 [MemoryPackable(GenerateType.Collection)]
-public partial class SetInt : HashSet<int>
-{
-}
+public partial class DictionaryIntInt : Dictionary<int, int> { }
 
 [MemoryPackable(GenerateType.Collection)]
-public partial class DictionaryIntInt : Dictionary<int, int>
-{
-}
-
-
-
-[MemoryPackable(GenerateType.Collection)]
-public partial class SetGenerics<T> : HashSet<T>
-{
-}
+public partial class SetGenerics<T> : HashSet<T> { }
 
 [MemoryPackable(GenerateType.Collection)]
 public partial class DictionaryGenerics<TK, TV> : Dictionary<TK, TV>
-    where TK : notnull
-{
-}
-
+    where TK : notnull { }
 
 //public class MyCollection<T> : List<T>, IMemoryPackFormatterRegister
 //{
@@ -646,7 +555,6 @@ public partial class DictionaryGenerics<TK, TV> : Dictionary<TK, TV>
 //        MemoryPackFormatterProvider.RegisterCollection<MyCollection<T?>, T>();
 //    }
 //}
-
 
 //[MemoryPackable]
 //public partial class Packable<T>
@@ -684,20 +592,17 @@ public partial class DictionaryGenerics<TK, TV> : Dictionary<TK, TV>
 //    public int MyProperty { get; set; }
 //}
 
-
-
 //public class C
 //{
 //    public int Foo { get; init; }
 //    public required int Bar { get; init; }
-
-
 
 [MemoryPackable]
 public partial class Sample
 {
     // these types are serialized by default
     public int PublicField;
+
     // public readonly int PublicReadOnlyField;
     public int PublicProperty { get; set; }
     public int PrivateSetPublicProperty { get; private set; }
@@ -717,15 +622,15 @@ public partial class Sample
     // use [MemoryPackInclude] to promote private member to serialization target
     [MemoryPackInclude]
     int privateField2;
+
     [MemoryPackInclude]
     int privateProperty2 { get; set; }
 }
 
-
 public struct DateTimeParamDefault
 {
     public DateTimeOffset DateTime; // short offset(2+padding) + dateTime/ulong(8) = 16
-    public long Timestamp;  // 8
+    public long Timestamp; // 8
     public bool IsItInSeconds; // 1(+padding7) = 8
 }
 
@@ -743,7 +648,7 @@ public partial struct TesTest
 public partial struct DateTimeParamSequential
 {
     public DateTimeOffset DateTime; // short offset(2+padding) + dateTime/ulong(8) = 16
-    public long Timestamp;  // 8
+    public long Timestamp; // 8
     public bool IsItInSeconds; // 1(+padding7) = 8
 }
 
@@ -752,7 +657,7 @@ public partial struct DateTimeParamSequential
 public partial struct DateTimeParamAuto
 {
     public DateTimeOffset DateTime; // short offset(2+padding) + dateTime/ulong(8) = 16
-    public long Timestamp;  // 8
+    public long Timestamp; // 8
     public bool IsItInSeconds; // 1(+padding7) = 8
 }
 
@@ -762,16 +667,16 @@ public partial struct DateTimeParamExplicit
 {
     [FieldOffset(9)]
     public DateTimeOffset DateTime;
+
     [FieldOffset(1)]
-    public long Timestamp;  // 8
+    public long Timestamp; // 8
+
     [FieldOffset(0)]
     public bool IsItInSeconds; // 1
 }
 
 [StructLayout(LayoutKind.Auto)]
-public struct MyMessageHeader
-{
-}
+public struct MyMessageHeader { }
 
 [MemoryPackable]
 public partial struct HogeEEE
@@ -786,4 +691,3 @@ public partial struct HogeEEE
         this.Y = y;
     }
 }
-

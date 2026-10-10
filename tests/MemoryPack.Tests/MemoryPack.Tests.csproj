@@ -6,9 +6,20 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(TargetFramework)' == 'net11.0'">
+        <LangVersion>preview</LangVersion>
+    </PropertyGroup>
+
+    <!-- Run preview syntax tests with the compiler shipped in the .NET 11 SDK.
+         The generator itself keeps its existing Roslyn compatibility baseline. -->
+    <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
+        <Reference Include="Microsoft.CodeAnalysis" HintPath="$(MSBuildToolsPath)/Roslyn/bincore/Microsoft.CodeAnalysis.dll" />
+        <Reference Include="Microsoft.CodeAnalysis.CSharp" HintPath="$(MSBuildToolsPath)/Roslyn/bincore/Microsoft.CodeAnalysis.CSharp.dll" />
+    </ItemGroup>
+
     <ItemGroup>
         <PackageReference Include="FluentAssertions" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Condition="'$(TargetFramework)' != 'net11.0'" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="RandomFixtureKit" />
         <PackageReference Include="xunit" />

@@ -26,18 +26,37 @@ internal partial class MissingSerializerContext : MemoryPackSerializerContext;
 
 public sealed class FirstValueFormatter : MemoryPackFormatter<ExternalValue>
 {
-    public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ExternalValue? value) => writer.WriteString("first:" + value?.Text);
-    public override void Deserialize(ref MemoryPackReader reader, scoped ref ExternalValue? value) => value = new(reader.ReadString()![6..]);
+    public override void Serialize<TBufferWriter>(
+        ref MemoryPackWriter<TBufferWriter> writer,
+        scoped ref ExternalValue? value
+    ) => writer.WriteString("first:" + value?.Text);
+
+    public override void Deserialize(
+        ref MemoryPackReader reader,
+        scoped ref ExternalValue? value
+    ) => value = new(reader.ReadString()![6..]);
 }
 
 public sealed class SecondValueFormatter : MemoryPackFormatter<ExternalValue>
 {
-    public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref ExternalValue? value) => writer.WriteString("second:" + value?.Text);
-    public override void Deserialize(ref MemoryPackReader reader, scoped ref ExternalValue? value) => value = new(reader.ReadString()![7..]);
+    public override void Serialize<TBufferWriter>(
+        ref MemoryPackWriter<TBufferWriter> writer,
+        scoped ref ExternalValue? value
+    ) => writer.WriteString("second:" + value?.Text);
+
+    public override void Deserialize(
+        ref MemoryPackReader reader,
+        scoped ref ExternalValue? value
+    ) => value = new(reader.ReadString()![7..]);
 }
 
 public sealed class OffsetIntFormatter : MemoryPackFormatter<int>
 {
-    public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref int value) => writer.WriteUnmanaged(value + 1000);
-    public override void Deserialize(ref MemoryPackReader reader, scoped ref int value) => value = reader.ReadUnmanaged<int>() - 1000;
+    public override void Serialize<TBufferWriter>(
+        ref MemoryPackWriter<TBufferWriter> writer,
+        scoped ref int value
+    ) => writer.WriteUnmanaged(value + 1000);
+
+    public override void Deserialize(ref MemoryPackReader reader, scoped ref int value) =>
+        value = reader.ReadUnmanaged<int>() - 1000;
 }
