@@ -18,6 +18,9 @@ concurrency, and computed priority-queue/lookup/interface-list dependencies.
 It also checks C# 15 declaration-based unions, explicit wide tags, empty union
 values, generic case dependencies, and closed record hierarchies through both
 static registration and instance serialization contexts.
+`MyAppResult.cs` also demonstrates custom case formatters for the external
+Polyester success/failure structs, including distinct generic payload types,
+null success payloads, and explicit context dependencies.
 
 Instance serialization uses generated metadata without global registration:
 

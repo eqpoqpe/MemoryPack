@@ -1138,7 +1138,7 @@ public static class {{initializerName}}
 
     string EmitUnionTypeToTagField()
     {
-        if (IsCSharpUnion) return "";
+        if (IsCSharpUnion) return EmitCSharpUnionFormatterFields();
         var elements = UnionTags.Select(x => $"            {{ typeof({ToUnionTagTypeFullyQualifiedToString(x.Type)}), {x.Tag} }},").NewLine();
 
         return $$"""

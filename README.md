@@ -430,6 +430,27 @@ The formatter writes a union tag followed by the typed case payload. Cases can u
 
 This initial C# union support requires disjoint case types and the default generation mode. Missing or duplicate case mappings, overlapping cases, and unsupported formatters produce generator diagnostics. Custom union member providers are not supported. Serialization contexts include the union and its case dependencies for static registration and Native AOT.
 
+For case types from another package, specify a `FormatterType` on the union's case attributes. An open generic formatter is constructed using that case's generic arguments, so a union with two type parameters can use a separate one-parameter formatter for each case:
+
+```csharp
+[MemoryPackable]
+[MemoryPackUnion(0, typeof(Success<>), FormatterType = typeof(SuccessFormatter<>))]
+[MemoryPackUnion(1, typeof(Failure<>), FormatterType = typeof(FailureFormatter<>))]
+public readonly partial union MyAppResult<TValue, TError>(Success<TValue>, Failure<TError>);
+```
+
+Each formatter must derive from `MemoryPackFormatter<CaseType>` and have an accessible parameterless constructor. The generated union constructs and calls these formatters directly, preserving Native AOT compatibility and keeping each formatter scoped to its union. An explicit formatter is also honored for unmanaged cases. `FormatterType` on a case is supported for C# unions only.
+
+Custom case formatters are opaque dependency boundaries, just like custom member formatters. Declare their payload dependencies explicitly in a serialization context:
+
+```csharp
+[MemoryPackSerializable<MyAppResult<string, int>>]
+[MemoryPackSerializable<string>, MemoryPackSerializable<int>]
+public partial class ResultContext : MemoryPackSerializerContext;
+```
+
+For a complete example using the external Polyester `Success<T>` and `Failure<T>` types, see [MyAppResult.cs](sandbox/ZeroNativeAot/MyAppResult.cs). It serializes the inner value/error after the case tag. It preserves null success/error payloads as their respective cases; applications can normalize null failure errors separately if their result contract treats them as uninitialized.
+
 If an interface and derived types are in different assemblies, you can use `MemoryPackUnionFormatterAttribute` instead. Formatters are generated the way that they are automatically registered via `ModuleInitializer` in C# 9.0 and above.
 
 

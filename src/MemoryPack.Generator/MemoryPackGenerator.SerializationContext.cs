@@ -248,6 +248,10 @@ public partial class MemoryPackGenerator
                 {
                     foreach (var (_, unionType) in meta.UnionTags)
                     {
+                        // Like member-level custom formatters, case formatters are scoped
+                        // to the declaration and opaque to dependency discovery. Their
+                        // payload dependencies must be declared as context roots.
+                        if (meta.UnionCaseFormatters.ContainsKey(unionType)) continue;
                         var closed = unionType is INamedTypeSymbol { IsUnboundGenericType: true } named && model.TypeArguments.Length == named.Arity
                             ? named.OriginalDefinition.Construct(model.TypeArguments.ToArray()) : unionType;
                         Visit(closed);

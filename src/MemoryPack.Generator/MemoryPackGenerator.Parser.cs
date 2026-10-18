@@ -65,6 +65,7 @@ public partial class TypeMeta
     public MethodMeta[] OnDeserializing { get; }
     public MethodMeta[] OnDeserialized { get; }
     public (ushort Tag, ITypeSymbol Type)[] UnionTags { get; }
+    public Dictionary<ITypeSymbol, ITypeSymbol> UnionCaseFormatters { get; } = new(SymbolEqualityComparer.Default);
     public bool IsUseEmptyConstructor => Constructor == null || Constructor.Parameters.IsEmpty;
 
     public TypeMeta(INamedTypeSymbol symbol, ReferenceSymbols reference)
@@ -122,10 +123,12 @@ public partial class TypeMeta
 
         if (IsUnion)
         {
-            this.UnionTags = symbol.GetAttributes()
+            var unionAttributes = symbol.GetAttributes()
                 .Where(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, reference.MemoryPackUnionAttribute))
                 .Where(x => x.ConstructorArguments.Length == 2)
                 .Where(x => x.ConstructorArguments[1].Value is ITypeSymbol)
+                .ToArray();
+            this.UnionTags = unionAttributes
                 .Select(x => (Tag: (ushort)x.ConstructorArguments[0].Value!, Type: (ITypeSymbol)x.ConstructorArguments[1].Value!))
                 .ToArray();
             if (IsCSharpUnion)
@@ -137,6 +140,17 @@ public partial class TypeMeta
                     .Select(x => x.Parameters[0].Type).ToArray();
                 this.UnionTags = UnionTags.Select(x => (x.Tag, cases.FirstOrDefault(c =>
                     MatchesUnionCase(x.Type, c)) ?? x.Type)).ToArray();
+            }
+            for (var i = 0; i < unionAttributes.Length; i++)
+            {
+                if (unionAttributes[i].NamedArguments.FirstOrDefault(x => x.Key == "FormatterType").Value.Value is ITypeSymbol formatter)
+                {
+                    var caseType = UnionTags[i].Type;
+                    if (formatter is INamedTypeSymbol { IsUnboundGenericType: true } genericFormatter
+                        && caseType is INamedTypeSymbol named && genericFormatter.Arity == named.TypeArguments.Length)
+                        formatter = genericFormatter.OriginalDefinition.Construct(named.TypeArguments.ToArray());
+                    UnionCaseFormatters[caseType] = formatter;
+                }
             }
         }
         else
@@ -203,6 +217,17 @@ public partial class TypeMeta
         }
         foreach (var (_, type) in UnionTags)
         {
+            if (UnionCaseFormatters.TryGetValue(type, out var formatter))
+            {
+                var expectedBase = reference.Compilation.GetTypeByMetadataName("MemoryPack.MemoryPackFormatter`1")!.Construct(type);
+                if (formatter is not INamedTypeSymbol named || named.IsUnboundGenericType || named.IsAbstract
+                    || !named.GetAllBaseTypes().Any(x => SymbolEqualityComparer.Default.Equals(x, expectedBase))
+                    || !reference.Compilation.IsSymbolAccessibleWithin(named, Symbol)
+                    || !named.InstanceConstructors.Any(x => x.Parameters.Length == 0
+                        && reference.Compilation.IsSymbolAccessibleWithin(x, Symbol)))
+                    Error($"formatter '{formatter.ToDisplayString()}' must be an accessible concrete MemoryPackFormatter<{type.ToDisplayString()}> with a parameterless constructor and matching generic arity");
+                continue;
+            }
             var kind = MemberMeta.ParseMemberKind(null, type, reference);
             if (kind is MemberKind.NonSerializable or MemberKind.RefLike)
                 Error($"case '{type.ToDisplayString()}' has no supported formatter");
@@ -329,6 +354,12 @@ public partial class TypeMeta
         if (IsUnion && Symbol.GetMembers("__MemoryPackCreateFormatter").Length != 0)
         {
             context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.ReservedUnionFactory, syntax.Identifier.GetLocation(), Symbol.Name));
+            noError = false;
+        }
+        if (!IsCSharpUnion && UnionCaseFormatters.Count != 0)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.InvalidCSharpUnion,
+                syntax.Identifier.GetLocation(), Symbol.Name, "FormatterType on union cases is only supported for C# union types"));
             noError = false;
         }
         if (IsCSharpUnion && !unionFormatter) return ValidateCSharpUnion(syntax, context) && noError;

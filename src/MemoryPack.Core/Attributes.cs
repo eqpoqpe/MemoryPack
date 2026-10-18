@@ -79,6 +79,9 @@ public sealed class MemoryPackUnionAttribute(ushort tag, Type type) : Attribute
 {
     public ushort Tag { get; } = tag;
     public Type Type { get; } = type;
+
+    /// <summary>Optional formatter for a C# union case. Open generic formatters use the case type's generic arguments.</summary>
+    public Type? FormatterType { get; set; }
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]

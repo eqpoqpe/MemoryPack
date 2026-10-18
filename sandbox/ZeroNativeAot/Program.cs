@@ -41,6 +41,7 @@ internal static class Program
             ("Nested collections", Collections),
             ("Union dispatch", Unions),
             ("C# 15 unions and closed hierarchies", CSharp15Smoke.Run),
+            ("External generic result cases", ExternalResultSmoke.Run),
             ("Version tolerance", VersionTolerance),
             ("Buffer writer", BufferWriter),
             ("Segmented sequence", SegmentedSequence),
