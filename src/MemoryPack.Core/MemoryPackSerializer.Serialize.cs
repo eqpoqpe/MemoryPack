@@ -112,7 +112,7 @@ public static partial class MemoryPackSerializer
                 return;
             }
 
-            var srcArray = ((Array)(object)value!);
+            var srcArray = (Array)(object)value!;
             var length = srcArray.Length;
             if (length == 0)
             {
@@ -124,10 +124,10 @@ public static partial class MemoryPackSerializer
 
             var dataSize = elementSize * length;
             var destSpan = bufferWriterRef.GetSpan(dataSize + 4);
-            ref var head = ref MemoryMarshal.GetReference(destSpan);
+            ref var head = ref GetReference(destSpan);
 
             Unsafe.WriteUnaligned(ref head, length);
-            Unsafe.CopyBlockUnaligned(ref Unsafe.Add(ref head, 4), ref MemoryMarshal.GetArrayDataReference(srcArray), (uint)dataSize);
+            Unsafe.CopyBlockUnaligned(ref Unsafe.Add(ref head, 4), ref GetArrayDataReference(srcArray), (uint)dataSize);
 
             bufferWriterRef.Advance(dataSize + 4);
             return;
