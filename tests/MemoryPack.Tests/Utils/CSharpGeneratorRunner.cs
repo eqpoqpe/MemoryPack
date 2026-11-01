@@ -45,13 +45,9 @@ global using MemoryPack;
         baseCompilation = compilation;
     }
 
-    public static (Compilation, ImmutableArray<Diagnostic>) RunGenerator(string source, string[]? preprocessorSymbols = null, AnalyzerConfigOptionsProvider? options = null, LanguageVersion languageVersion = LanguageVersion.CSharp11)
+    public static (Compilation, ImmutableArray<Diagnostic>) RunGenerator(string source, AnalyzerConfigOptionsProvider? options = null, LanguageVersion languageVersion = LanguageVersion.CSharp11)
     {
-        if (preprocessorSymbols == null)
-        {
-            preprocessorSymbols = new[] { "NET7_0_OR_GREATER" };
-        }
-        var parseOptions = new CSharpParseOptions(languageVersion, preprocessorSymbols: preprocessorSymbols);
+        var parseOptions = new CSharpParseOptions(languageVersion);
 
         var driver = CSharpGeneratorDriver.Create(new MemoryPackGenerator()).WithUpdatedParseOptions(parseOptions);
         if (options != null)

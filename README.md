@@ -30,7 +30,7 @@ Other than performance, MemoryPack has these features.
 
 Installation
 ---
-This library is distributed via NuGet. Supported target frameworks are `net8.0`, `net10.0`, and `net11.0`. Building the repository requires a .NET 11 SDK.
+This library is distributed via NuGet. Supported target frameworks are `net10.0` and `net11.0`. Building the repository requires a .NET 11 SDK.
 
 > PM> Install-Package [MemoryPack](https://www.nuget.org/packages/MemoryPack)
 
@@ -1361,10 +1361,10 @@ using (var state = MemoryPackReaderOptionalStatePool.Rent(MemoryPackSerializerOp
 
 Target framework dependency
 ---
-Runtime packages target `net8.0;net10.0;net11.0`. Libraries that depend on MemoryPack must target .NET 8 or later.
+Runtime packages target `net10.0;net11.0`. Libraries that depend on MemoryPack must target .NET 10 or later.
 
 ```xml
-<TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
+<TargetFrameworks>net10.0;net11.0</TargetFrameworks>
 ```
 
 Package versions for the repository are managed centrally in `Directory.Packages.props`.

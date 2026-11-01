@@ -26,9 +26,7 @@ namespace MemoryPack
             { typeof(ILookup<,>), typeof(InterfaceLookupFormatter<,>) },
             { typeof(IGrouping<,>), typeof(InterfaceGroupingFormatter<,>) },
             { typeof(ISet<>), typeof(InterfaceSetFormatter<>) },
-#if NET7_0_OR_GREATER
             { typeof(IReadOnlySet<>), typeof(InterfaceReadOnlySetFormatter<>) },
-#endif
         };
     }
 }
@@ -42,11 +40,7 @@ namespace MemoryPack.Formatters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TrySerializeOptimized<TBufferWriter, TCollection, TElement>(ref MemoryPackWriter<TBufferWriter> writer, [NotNullWhen(false)] scoped ref TCollection? value)
             where TCollection : IEnumerable<TElement>
-#if NET7_0_OR_GREATER
             where TBufferWriter : IBufferWriter<byte>
-#else
-            where TBufferWriter : class, IBufferWriter<byte>
-#endif
         {
             if (value == null)
             {
@@ -62,24 +56,18 @@ namespace MemoryPack.Formatters
                 return true;
             }
 
-#if NET7_0_OR_GREATER
             if (value is List<TElement?> list)
             {
                 writer.WriteSpan(CollectionsMarshal.AsSpan(list));
                 return true;
             }
-#endif
 
             return false;
         }
 
         public static void SerializeCollection<TBufferWriter, TCollection, TElement>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref TCollection? value)
             where TCollection : ICollection<TElement>
-#if NET7_0_OR_GREATER
             where TBufferWriter : IBufferWriter<byte>
-#else
-            where TBufferWriter : class, IBufferWriter<byte>
-#endif
         {
             if (TrySerializeOptimized<TBufferWriter, TCollection, TElement>(ref writer, ref value)) return;
 
@@ -94,11 +82,7 @@ namespace MemoryPack.Formatters
 
         public static void SerializeReadOnlyCollection<TBufferWriter, TCollection, TElement>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref TCollection? value)
             where TCollection : IReadOnlyCollection<TElement>
-#if NET7_0_OR_GREATER
             where TBufferWriter : IBufferWriter<byte>
-#else
-            where TBufferWriter : class, IBufferWriter<byte>
-#endif
         {
             if (TrySerializeOptimized<TBufferWriter, TCollection, TElement>(ref writer, ref value)) return;
 
@@ -542,7 +526,6 @@ namespace MemoryPack.Formatters
         }
     }
 
-#if NET7_0_OR_GREATER
 
     public sealed class InterfaceReadOnlySetFormatter<T> : MemoryPackFormatter<IReadOnlySet<T?>>
     {
@@ -605,7 +588,6 @@ namespace MemoryPack.Formatters
         }
     }
 
-#endif
 
     internal sealed class Grouping<TKey, TElement> : IGrouping<TKey, TElement>
     {

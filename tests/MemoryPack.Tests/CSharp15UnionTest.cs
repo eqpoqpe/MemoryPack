@@ -155,7 +155,7 @@ public class CSharp15UnionTest
         using var stream = new MemoryStream();
         var emit = compilation.Emit(stream);
         emit.Success.Should().BeTrue(string.Join("\n", emit.Diagnostics));
-        var options = new CSharpParseOptions(LanguageVersion.Preview, preprocessorSymbols: new[] { "NET7_0_OR_GREATER" });
+        var options = new CSharpParseOptions(LanguageVersion.Preview);
         var consumer = compilation.RemoveAllSyntaxTrees().WithAssemblyName("consumer")
             .AddReferences(MetadataReference.CreateFromImage(stream.ToArray()))
             .AddSyntaxTrees(CSharpSyntaxTree.ParseText("using MemoryPack; [MemoryPackSerializable<Result<int>>] partial class Context : MemoryPackSerializerContext;", options));
@@ -173,7 +173,7 @@ public class CSharp15UnionTest
     public void EditingACaseInvalidatesAnUnchangedUnionDeclaration()
     {
         var (compilation, _) = CSharpGeneratorRunner.RunGenerator("", languageVersion: LanguageVersion.Preview);
-        var options = new CSharpParseOptions(LanguageVersion.Preview, preprocessorSymbols: new[] { "NET7_0_OR_GREATER" });
+        var options = new CSharpParseOptions(LanguageVersion.Preview);
         var root = CSharpSyntaxTree.ParseText("using MemoryPack; [MemoryPackable, MemoryPackUnion(0, typeof(Case)), MemoryPackUnion(1, typeof(int))] public partial union Root(Case, int);", options);
         var originalCase = CSharpSyntaxTree.ParseText("using MemoryPack; [MemoryPackable] public sealed partial record Case(string Value);", options);
         var original = compilation.RemoveAllSyntaxTrees().AddSyntaxTrees(root, originalCase);

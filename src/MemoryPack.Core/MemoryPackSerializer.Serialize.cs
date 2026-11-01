@@ -5,12 +5,8 @@ using System.Runtime.InteropServices;
 
 namespace MemoryPack;
 
-#if NET7_0_OR_GREATER
 using static MemoryMarshal;
 using static GC;
-#else
-using static MemoryPack.Internal.MemoryMarshalEx;
-#endif
 
 public static partial class MemoryPackSerializer
 {
@@ -27,7 +23,6 @@ public static partial class MemoryPackSerializer
             Unsafe.WriteUnaligned(ref GetArrayDataReference(array), value);
             return array;
         }
-#if NET7_0_OR_GREATER
         var typeKind = TypeHelpers.TryGetUnmanagedSZArrayElementSizeOrMemoryPackableFixedSize<T>(out var elementSize);
         if (typeKind == TypeHelpers.TypeKind.None)
         {
@@ -64,7 +59,6 @@ public static partial class MemoryPackSerializer
             Serialize(ref writer, value);
             return bufferWriter.GetFilledBuffer();
         }
-#endif
 
         var state = threadStaticState;
         if (state == null)
@@ -86,11 +80,7 @@ public static partial class MemoryPackSerializer
     }
 
     public static void Serialize<T, TBufferWriter>(in TBufferWriter bufferWriter, in T? value, MemoryPackSerializerOptions? options = default)
-#if NET7_0_OR_GREATER
         where TBufferWriter : IBufferWriter<byte>
-#else
-        where TBufferWriter : class, IBufferWriter<byte>
-#endif
     {
         ref var bufferWriterRef = ref Unsafe.AsRef(in bufferWriter);
         if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
@@ -100,7 +90,6 @@ public static partial class MemoryPackSerializer
             bufferWriterRef.Advance(Unsafe.SizeOf<T>());
             return;
         }
-#if NET7_0_OR_GREATER
         var typeKind = TypeHelpers.TryGetUnmanagedSZArrayElementSizeOrMemoryPackableFixedSize<T>(out var elementSize);
         if (typeKind == TypeHelpers.TypeKind.UnmanagedSZArray)
         {
@@ -132,7 +121,6 @@ public static partial class MemoryPackSerializer
             bufferWriterRef.Advance(dataSize + 4);
             return;
         }
-#endif
 
         var state = threadStaticWriterOptionalState;
         if (state == null)
@@ -154,11 +142,7 @@ public static partial class MemoryPackSerializer
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Serialize<T, TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, in T? value)
-#if NET7_0_OR_GREATER
         where TBufferWriter : IBufferWriter<byte>
-#else
-        where TBufferWriter : class, IBufferWriter<byte>
-#endif
     {
         writer.WriteValue(value);
         writer.Flush();

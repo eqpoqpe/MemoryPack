@@ -88,9 +88,6 @@ public class ReferenceSymbols
         public INamedTypeSymbol System_Collections_Generic_KeyValuePair_T { get; }
         public INamedTypeSymbol System_Nullable_T { get; }
 
-        public INamedTypeSymbol System_DateTime { get; }
-        public INamedTypeSymbol System_DateTimeOffset { get; }
-        public INamedTypeSymbol System_Runtime_InteropServices_StructLayout { get; }
 
         // netstandard2.0 source generator has there reference so use string instead...
         //public INamedTypeSymbol System_Memory_T { get; }
@@ -210,9 +207,6 @@ public class ReferenceSymbols
             //System_Buffers_ReadOnlySequence_T = GetTypeByMetadataName("System.Buffers.ReadOnlySequence").ConstructUnboundGenericType();
             //System_Collections_Generic_PriorityQueue_T = GetTypeByMetadataName("System.Collections.Generic.PriorityQueue").ConstructUnboundGenericType();
 
-            System_DateTime = GetTypeByMetadataName("System.DateTime");
-            System_DateTimeOffset = GetTypeByMetadataName("System.DateTimeOffset");
-            System_Runtime_InteropServices_StructLayout = GetTypeByMetadataName("System.Runtime.InteropServices.StructLayoutAttribute");
 
             knownTypes = new HashSet<ITypeSymbol>(new[]
             {
@@ -339,4 +333,3 @@ public class ReferenceSymbols
         INamedTypeSymbol GetTypeByMetadataName(string metadataName) => parent.GetTypeByMetadataName(metadataName);
     }
 }
-

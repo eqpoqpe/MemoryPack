@@ -61,14 +61,7 @@ namespace MemoryPack.Formatters
                 return;
             }
 
-#if NET8_0_OR_GREATER
             value = ImmutableCollectionsMarshal.AsImmutableArray(array);
-#else
-            // create Empty and replace inner T[] field(avoid defensive copy of Create)
-            value = ImmutableArray.Create<T?>();
-            ref var view = ref Unsafe.As<ImmutableArray<T?>, ImmutableArrayView<T?>>(ref value);
-            view.array = array;
-#endif
         }
     }
 

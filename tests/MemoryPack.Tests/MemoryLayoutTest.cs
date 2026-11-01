@@ -6,7 +6,6 @@ namespace MemoryPack.Tests;
 
 public class MemoryLayoutTest
 {
-#if NET7_0_OR_GREATER
 
     [Fact]
     public void Default()
@@ -32,21 +31,6 @@ public class MemoryLayoutTest
         offset3.Should().Be(24);
     }
 
-#else
-
-    // https://github.com/dotnet/runtime/issues/44579
-    [Fact]
-    public void SequentialLayoutPromotedToAutoInBeforeNet7()
-    {
-        var defaultOffsets = GetOffsets();
-        var sequentialOffsets = GetOffsetsSequential();
-        var autoOffsets = GetOffsetsAuto();
-
-        defaultOffsets.Should().Be(sequentialOffsets);
-        defaultOffsets.Should().Be(autoOffsets);
-    }
-
-#endif
 
     [Fact]
     public void Auto()

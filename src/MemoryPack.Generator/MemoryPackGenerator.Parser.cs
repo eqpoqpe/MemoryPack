@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.ComponentModel;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -431,63 +430,6 @@ public partial class TypeMeta
                 context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.VersionTolerantOnUnmanagedStruct, syntax.Identifier.GetLocation(), Symbol.Name));
                 noError = false;
             }
-
-            var structLayoutFields = this.Symbol.GetAllMembers()
-                .OfType<IFieldSymbol>()
-                .Select(x =>
-                {
-                    if (x.IsStatic) return null;
-
-                    // ValueTuple, DateTime, DateTimeOffset is auto but can not get from Roslyn GetAttributes.
-
-                    if (SymbolEqualityComparer.Default.Equals(x.Type, reference.KnownTypes.System_DateTime) || SymbolEqualityComparer.Default.Equals(x.Type, reference.KnownTypes.System_DateTimeOffset))
-                    {
-                        return Tuple.Create(x.Type, LayoutKind.Auto);
-                    }
-
-                    if (x.Type is INamedTypeSymbol nts && nts.IsGenericType)
-                    {
-                        var fullyQualifiedString = nts.ConstructUnboundGenericType().FullyQualifiedToString();
-                        if (fullyQualifiedString.StartsWith("global::System.ValueTuple<"))
-                        {
-                            return Tuple.Create(x.Type, LayoutKind.Auto);
-                        }
-                    }
-
-                    var structLayout = x.Type.GetAttribute(reference.KnownTypes.System_Runtime_InteropServices_StructLayout);
-                    var layoutKind = (structLayout != null && structLayout.ConstructorArguments.Length != 0)
-                        ? structLayout.ConstructorArguments[0].Value
-                        : null;
-
-                    if (layoutKind != null)
-                    {
-                        return Tuple.Create(x.Type, (LayoutKind)layoutKind);
-                    }
-
-                    return null;
-                })
-                .Where(x => x != null && x.Item2 == LayoutKind.Auto)
-                .ToArray();
-
-            // has auto field, should mark Auto in lower Net6
-            if (structLayoutFields.Length != 0)
-            {
-                var structLayout = Symbol.GetAttribute(reference.KnownTypes.System_Runtime_InteropServices_StructLayout);
-                var layoutKind = (structLayout != null && structLayout.ConstructorArguments.Length != 0)
-                    ? structLayout.ConstructorArguments[0].Value
-                    : null;
-
-                if (layoutKind == null || (LayoutKind)layoutKind == LayoutKind.Sequential)
-                {
-                    var autoTypes = string.Join(", ", structLayoutFields.Select(x => x!.Item1.Name));
-
-                    if (!context.IsNet7OrGreater)
-                    {
-                        context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.UnamangedStructWithLayoutAutoField, syntax.Identifier.GetLocation(), Symbol.Name, autoTypes));
-                        noError = false;
-                    }
-                }
-            }
         }
         else
         {
@@ -820,11 +762,7 @@ partial class MemberMeta
             IsProperty = false;
             IsField = true;
             IsSettable = !f.IsReadOnly; // readonly field can not set.
-            IsAssignable = IsSettable
-#if !ROSLYN3
-                 && !f.IsRequired
-#endif
-                ;
+            IsAssignable = IsSettable && !f.IsRequired;
             MemberType = f.Type;
         }
         else if (symbol is IPropertySymbol p)
@@ -833,9 +771,7 @@ partial class MemberMeta
             IsField = false;
             IsSettable = !p.IsReadOnly;
             IsAssignable = IsSettable
-#if !ROSLYN3
                 && !p.IsRequired
-#endif
                 && (p.SetMethod != null && !p.SetMethod.IsInitOnly);
             MemberType = p.Type;
         }

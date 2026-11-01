@@ -51,11 +51,7 @@ public partial class EmitIdData
 
     [MemoryPackOnSerializing]
     static void WriteId<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, ref EmitIdData? value)
-#if NET7_0_OR_GREATER
         where TBufferWriter : IBufferWriter<byte>
-#else
-        where TBufferWriter : class, IBufferWriter<byte>
-#endif
     {
         writer.WriteUnmanaged(Guid.NewGuid()); // emit GUID in header.
     }

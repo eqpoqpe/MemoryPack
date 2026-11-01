@@ -18,13 +18,9 @@ public partial class CustomFormatterCheck
     [Utf16StringFormatter]
     public string? Prop1 { get; set; }
 
-#if NET7_0_OR_GREATER
     [OrdinalIgnoreCaseStringDictionaryFormatter<int>]
-#endif
     public Dictionary<string, int>? PropDict { get; set; }
-#if NET7_0_OR_GREATER
     [OrdinalIgnoreCaseStringDictionaryFormatter<string>]
-#endif
     public Dictionary<string, string>? FieldDict;
 
 }

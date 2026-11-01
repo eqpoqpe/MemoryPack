@@ -105,7 +105,7 @@ public class UnionCaseFormatterTest
         using var stream = new MemoryStream();
         var emit = compilation.Emit(stream);
         emit.Success.Should().BeTrue(string.Join("\n", emit.Diagnostics));
-        var options = new CSharpParseOptions(LanguageVersion.Preview, preprocessorSymbols: new[] { "NET7_0_OR_GREATER" });
+        var options = new CSharpParseOptions(LanguageVersion.Preview);
         var consumer = compilation.RemoveAllSyntaxTrees().WithAssemblyName("consumer")
             .AddReferences(MetadataReference.CreateFromImage(stream.ToArray()))
             .AddSyntaxTrees(CSharpSyntaxTree.ParseText("""

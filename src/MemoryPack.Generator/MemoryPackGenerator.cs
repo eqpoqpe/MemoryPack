@@ -62,10 +62,7 @@ public partial class MemoryPackGenerator : IIncrementalGenerator
         var parseOptions = context.ParseOptionsProvider
             .Select((parseOptions, token) =>
             {
-                var csOptions = (CSharpParseOptions)parseOptions;
-                var langVersion = csOptions.LanguageVersion;
-                var net7 = csOptions.PreprocessorSymbolNames.Contains("NET7_0_OR_GREATER");
-                return (langVersion, net7);
+                return ((CSharpParseOptions)parseOptions).LanguageVersion;
             })
             .WithTrackingName("MemoryPack.MemoryPackable.0_ParseOptionsProvider");
 
@@ -108,9 +105,9 @@ public partial class MemoryPackGenerator : IIncrementalGenerator
             {
                 var (typeDeclaration, compilation) = source.Left.Item1;
                 var logPath = source.Left.Item2;
-                var (langVersion, net7) = source.Right;
+                var langVersion = source.Right;
 
-                Generate(typeDeclaration, compilation, logPath, new GeneratorContext(context, langVersion, net7));
+                Generate(typeDeclaration, compilation, logPath, new GeneratorContext(context, langVersion));
             });
         }
         {
@@ -125,9 +122,9 @@ public partial class MemoryPackGenerator : IIncrementalGenerator
             {
                 var (typeDeclaration, compilation) = source.Left.Item1;
                 var logPath = source.Left.Item2;
-                var (langVersion, net7) = source.Right;
+                var langVersion = source.Right;
 
-                Generate(typeDeclaration, compilation, logPath, new GeneratorContext(context, langVersion, net7));
+                Generate(typeDeclaration, compilation, logPath, new GeneratorContext(context, langVersion));
             });
         }
     }
@@ -299,18 +296,15 @@ public partial class MemoryPackGenerator : IIncrementalGenerator
     {
         SourceProductionContext context;
 
-        public GeneratorContext(SourceProductionContext context, LanguageVersion languageVersion, bool isNet70OrGreater)
+        public GeneratorContext(SourceProductionContext context, LanguageVersion languageVersion)
         {
             this.context = context;
             this.LanguageVersion = languageVersion;
-            this.IsNet7OrGreater = isNet70OrGreater;
         }
 
         public CancellationToken CancellationToken => context.CancellationToken;
 
         public Microsoft.CodeAnalysis.CSharp.LanguageVersion LanguageVersion { get; }
-
-        public bool IsNet7OrGreater { get; }
 
         public void AddSource(string hintName, string source)
         {

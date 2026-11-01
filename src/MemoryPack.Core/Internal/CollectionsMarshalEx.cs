@@ -1,6 +1,4 @@
-﻿#if NET7_0_OR_GREATER
-
-#pragma warning disable CS8618
+﻿#pragma warning disable CS8618
 #pragma warning disable CS0649
 
 using System.Runtime.CompilerServices;
@@ -36,7 +34,7 @@ internal static class CollectionsMarshalEx
         return view._items.AsSpan(0, view._size);
     }
 
-    // NOTE: These structure depndent on .NET 7, if changed, require to keep same structure.
+    // These views must match the runtime layouts of List<T> and Stack<T>.
 
     internal sealed class ListView<T>
     {
@@ -52,5 +50,3 @@ internal static class CollectionsMarshalEx
         public int _version;
     }
 }
-
-#endif

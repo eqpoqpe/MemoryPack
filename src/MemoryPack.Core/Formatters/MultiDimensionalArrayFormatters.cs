@@ -23,7 +23,6 @@ public sealed class TwoDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,]>
         var j = value.GetLength(1);
         writer.WriteUnmanaged(i, j);
 
-#if NET7_0_OR_GREATER
         if (!RuntimeHelpers.IsReferenceOrContainsReferences<T?>())
         {
             var byteCount = Unsafe.SizeOf<T>() * i * j;
@@ -35,7 +34,6 @@ public sealed class TwoDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,]>
             writer.Advance(byteCount + 4);
         }
         else
-#endif
         {
 
             writer.WriteCollectionHeader(value.Length);
@@ -77,7 +75,6 @@ public sealed class TwoDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,]>
             value = new T[iLength, jLength];
         }
 
-#if NET7_0_OR_GREATER
         if (!RuntimeHelpers.IsReferenceOrContainsReferences<T?>())
         {
             var byteCount = Unsafe.SizeOf<T>() * iLength * jLength;
@@ -88,7 +85,6 @@ public sealed class TwoDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,]>
             reader.Advance(byteCount);
         }
         else
-#endif
         {
             var formatter = reader.GetFormatter<T?>();
 
@@ -132,7 +128,6 @@ public sealed class ThreeDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,
         var k = value.GetLength(2);
         writer.WriteUnmanaged(i, j, k);
 
-#if NET7_0_OR_GREATER
         if (!RuntimeHelpers.IsReferenceOrContainsReferences<T?>())
         {
             var byteCount = Unsafe.SizeOf<T>() * i * j * k;
@@ -144,7 +139,6 @@ public sealed class ThreeDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,
             writer.Advance(byteCount + 4);
         }
         else
-#endif
         {
             writer.WriteCollectionHeader(value.Length);
             var formatter = writer.GetFormatter<T?>();
@@ -185,7 +179,6 @@ public sealed class ThreeDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,
             value = new T[iLength, jLength, kLength];
         }
 
-#if NET7_0_OR_GREATER
         if (!RuntimeHelpers.IsReferenceOrContainsReferences<T?>())
         {
             var byteCount = Unsafe.SizeOf<T>() * iLength * jLength * kLength;
@@ -196,7 +189,6 @@ public sealed class ThreeDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,
             reader.Advance(byteCount);
         }
         else
-#endif
         {
             var formatter = reader.GetFormatter<T?>();
 
@@ -248,7 +240,6 @@ public sealed class FourDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,,
         var l = value.GetLength(3);
         writer.WriteUnmanaged(i, j, k, l);
 
-#if NET7_0_OR_GREATER
         if (!RuntimeHelpers.IsReferenceOrContainsReferences<T?>())
         {
             var byteCount = Unsafe.SizeOf<T>() * i * j * k * l;
@@ -260,7 +251,6 @@ public sealed class FourDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,,
             writer.Advance(byteCount + 4);
         }
         else
-#endif
         {
             writer.WriteCollectionHeader(value.Length);
             var formatter = writer.GetFormatter<T?>();
@@ -301,7 +291,6 @@ public sealed class FourDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,,
             value = new T[iLength, jLength, kLength, lLength];
         }
 
-#if NET7_0_OR_GREATER
         if (!RuntimeHelpers.IsReferenceOrContainsReferences<T?>())
         {
             var byteCount = Unsafe.SizeOf<T>() * iLength * jLength * kLength * lLength;
@@ -312,7 +301,6 @@ public sealed class FourDimensionalArrayFormatter<T> : MemoryPackFormatter<T?[,,
             reader.Advance(byteCount);
         }
         else
-#endif
         {
             var formatter = reader.GetFormatter<T?>();
 

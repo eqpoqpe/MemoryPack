@@ -28,11 +28,7 @@ public class CompressionTest
         var texts = new[] { pattern1, pattern2 };
         foreach (var text in texts)
         {
-#if NET7_0_OR_GREATER
             using var brotli = new BrotliCompressor();
-#else
-            using var brotli = new BrotliCompressor(CompressionLevel.Fastest);
-#endif
 
             MemoryPackSerializer.Serialize(brotli, text);
 
@@ -107,7 +103,6 @@ public class CompressionTest
         }
     }
 
-#if NET7_0_OR_GREATER
 
     [Fact]
     public void AttributeCompression2()
@@ -161,7 +156,6 @@ public class CompressionTest
         }
     }
 
-#endif
 
     byte[] ReferenceDecompress(byte[] bytes)
     {
@@ -190,7 +184,6 @@ public partial class CompressionAttrData
     public int Id2 { get; set; }
 }
 
-#if NET7_0_OR_GREATER
 
 [MemoryPackable]
 public partial class CompressionAttrData2
@@ -208,5 +201,3 @@ public partial class CompressionAttrData2
 
     public int Id2 { get; set; }
 }
-
-#endif

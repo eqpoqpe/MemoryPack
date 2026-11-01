@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- <PublishAot>true</PublishAot> -->
@@ -17,7 +17,6 @@
     <PackageReference Include="ConsoleAppFramework" />
     <PackageReference Include="MessagePack" />
     <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="System.IO.Pipelines" />
   </ItemGroup>
 
   <!-- output memoerypack serialization info to directory -->

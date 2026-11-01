@@ -67,7 +67,6 @@ public sealed class MemoryPackWriterOptionalState : IDisposable
 
     public (bool existsReference, uint id) GetOrAddReference(object value)
     {
-#if NET7_0_OR_GREATER
         ref var id = ref CollectionsMarshal.GetValueRefOrAddDefault(objectToRef, value, out var exists);
         if (exists)
         {
@@ -78,18 +77,6 @@ public sealed class MemoryPackWriterOptionalState : IDisposable
             id = nextId++;
             return (false, id);
         }
-#else
-        if (objectToRef.TryGetValue(value, out var id))
-        {
-            return (true, id);
-        }
-        else
-        {
-            id = nextId++;
-            objectToRef.Add(value, id);
-            return (false, id);
-        }
-#endif
     }
 
     void IDisposable.Dispose()

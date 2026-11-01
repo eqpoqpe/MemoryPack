@@ -1,5 +1,4 @@
-﻿#if NET8_0_OR_GREATER
-using MemoryPack.Formatters;
+﻿using MemoryPack.Formatters;
 using MemoryPack.Internal;
 using System.Collections.Frozen;
 
@@ -130,4 +129,3 @@ namespace MemoryPack.Formatters
         }
     }
 }
-#endif

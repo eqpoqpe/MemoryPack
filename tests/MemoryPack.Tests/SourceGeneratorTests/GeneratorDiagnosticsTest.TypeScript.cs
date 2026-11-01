@@ -1,6 +1,4 @@
-﻿#if NET7_0_OR_GREATER
-
-using MemoryPack.Generator;
+﻿using MemoryPack.Generator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -293,5 +291,3 @@ public enum ULongEnum : ulong
 {
 
 }
-
-#endif

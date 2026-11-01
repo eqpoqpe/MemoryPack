@@ -43,9 +43,7 @@ public partial class HogeHoge
     public Queue<int> P20;
     public LinkedList<int> P21;
     public HashSet<int> P22;
-#if NET7_0_OR_GREATER
     public PriorityQueue<int, int> P23;
-#endif
     public ObservableCollection<int> P24;
     public Collection<int> P25;
     public ConcurrentQueue<int> P26;
@@ -82,9 +80,7 @@ public partial class HogeHoge
     public ILookup<int, int> P56;
     public IGrouping<int, int> P57;
     public ISet<int> P58;
-#if NET7_0_OR_GREATER
     public IReadOnlySet<int> P59;
-#endif
     public SortedSet<int> P60;
     public Nullable<MyStruct> P61;
     public KnownFruits P62;

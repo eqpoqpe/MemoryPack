@@ -263,7 +263,7 @@ public partial class TypeMeta
 
         if (GenerateType == GenerateType.Collection)
         {
-            writer.AppendLine(EmitGenericCollectionTemplate(context));
+            writer.AppendLine(EmitGenericCollectionTemplate());
             return;
         }
 
@@ -327,46 +327,33 @@ public partial class TypeMeta
 
         var nullable = IsValueType ? "" : "?";
 
-        string staticRegisterFormatterMethod, staticMemoryPackableMethod, scopedRef, constraint, registerBody, registerT;
+        var staticRegisterFormatterMethod = "static void IMemoryPackFormatterRegister.";
+        var staticMemoryPackableMethod = $"static void IMemoryPackable<{TypeName}>.";
+        var registerBody = $"global::MemoryPack.MemoryPackFormatterProvider.Register(new global::MemoryPack.Formatters.MemoryPackableFormatter<{TypeName}>());";
+        var registerT = $"global::MemoryPack.MemoryPackFormatterProvider.Register<{TypeName}>();";
         var fixedSizeInterface = "";
         var fixedSizeMethod = "";
-        scopedRef = (context.IsCSharp11OrGreater())
+        var scopedRef = (context.IsCSharp11OrGreater())
             ? "scoped ref"
             : "ref";
-        if (!context.IsNet7OrGreater)
+
+        // similar as VersionTolerantOptimized but not includes String, Array
+        var fixedSize = false;
+        if (Members.All(x => x.Kind is MemberKind.Unmanaged or MemberKind.Enum or MemberKind.UnmanagedNullable or MemberKind.Blank))
         {
-            staticRegisterFormatterMethod = "public static void ";
-            staticMemoryPackableMethod = "public static void ";
-            constraint = "where TBufferWriter : class, System.Buffers.IBufferWriter<byte>";
-            registerBody = $"global::MemoryPack.MemoryPackFormatterProvider.Register(new {Symbol.Name}Formatter());";
-            registerT = "RegisterFormatter();";
+            fixedSize = true;
         }
-        else
+
+        var callbackCount = new[] { this.OnSerializing, this.OnSerialized, this.OnDeserialized, this.OnDeserializing }.Select(x => x.Length).Sum();
+        if (fixedSize && GenerateType == GenerateType.Object && !this.IsValueType && callbackCount == 0)
         {
-            staticRegisterFormatterMethod = $"static void IMemoryPackFormatterRegister.";
-            staticMemoryPackableMethod = $"static void IMemoryPackable<{TypeName}>.";
-            constraint = "";
-            registerBody = $"global::MemoryPack.MemoryPackFormatterProvider.Register(new global::MemoryPack.Formatters.MemoryPackableFormatter<{TypeName}>());";
-            registerT = $"global::MemoryPack.MemoryPackFormatterProvider.Register<{TypeName}>();";
-
-            // similar as VersionTolerantOptimized but not includes String, Array
-            var fixedSize = false;
-            if (Members.All(x => x.Kind is MemberKind.Unmanaged or MemberKind.Enum or MemberKind.UnmanagedNullable or MemberKind.Blank))
-            {
-                fixedSize = true;
-            }
-
-            var callbackCount = new[] { this.OnSerializing, this.OnSerialized, this.OnDeserialized, this.OnDeserializing }.Select(x => x.Length).Sum();
-            if (fixedSize && GenerateType == GenerateType.Object && !this.IsValueType && callbackCount == 0)
-            {
-                var sizeOf = string.Join(" + ", Members.Select(x => $"System.Runtime.CompilerServices.Unsafe.SizeOf<{x.MemberType.FullyQualifiedToString()}>()"));
-                var headerPlus = (Members.Length == 0) ? "1" : "1 + ";
-                fixedSizeInterface = ", global::MemoryPack.IFixedSizeMemoryPackable";
-                fixedSizeMethod = $$"""
+            var sizeOf = string.Join(" + ", Members.Select(x => $"System.Runtime.CompilerServices.Unsafe.SizeOf<{x.MemberType.FullyQualifiedToString()}>()"));
+            var headerPlus = (Members.Length == 0) ? "1" : "1 + ";
+            fixedSizeInterface = ", global::MemoryPack.IFixedSizeMemoryPackable";
+            fixedSizeMethod = $$"""
     static int global::MemoryPack.IFixedSizeMemoryPackable.Size => {{headerPlus}}{{sizeOf}};
 
 """;
-            }
         }
         var serializeMethodSignarture = "Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter>";
 
@@ -398,9 +385,9 @@ partial {{classOrStructOrRecord}} {{TypeName}} : IMemoryPackable<{{TypeName}}>{{
         {
             global::MemoryPack.MemoryPackFormatterProvider.Register(new global::MemoryPack.Formatters.ArrayFormatter<{{TypeName}}>());
         }
-{{EmitAdditionalRegisterFormatter("        ", context)}}
+{{EmitAdditionalRegisterFormatter("        ")}}
     }
-    {{staticMemoryPackableMethod}}{{serializeMethodSignarture}} writer, {{scopedRef}} {{TypeName}}{{nullable}} value) {{constraint}}
+    {{staticMemoryPackableMethod}}{{serializeMethodSignarture}} writer, {{scopedRef}} {{TypeName}}{{nullable}} value)
 {{(GenerateType == GenerateType.CircularReference ? $$"""
     {
         __MemoryPackSerialize(ref writer, ref value);
@@ -409,7 +396,7 @@ partial {{classOrStructOrRecord}} {{TypeName}} : IMemoryPackable<{{TypeName}}>{{
     // circular serializer crashes in the observed .NET 11 NativeAOT build.
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
     static void __MemoryPackSerialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, {{scopedRef}} {{TypeName}}{{nullable}} value)
-        where TBufferWriter : {{(context.IsNet7OrGreater ? "" : "class, ")}}global::System.Buffers.IBufferWriter<byte>
+        where TBufferWriter : global::System.Buffers.IBufferWriter<byte>
 """ : "")}}
     {
 {{OnSerializing.Select(x => "        " + x.Emit()).NewLine()}}
@@ -428,29 +415,6 @@ partial {{classOrStructOrRecord}} {{TypeName}} : IMemoryPackable<{{TypeName}}>{{
     }
 }
 """);
-
-        if (!context.IsNet7OrGreater)
-        {
-            // add formatter(can not use MemoryPackableFormatter)
-
-            var code = $$"""
-partial {{classOrStructOrRecord}} {{TypeName}}
-{
-    sealed class {{Symbol.Name}}Formatter : MemoryPackFormatter<{{TypeName}}>
-    {
-        public override void {{serializeMethodSignarture}} writer,  {{scopedRef}} {{TypeName}} value)
-        {
-            {{TypeName}}.Serialize(ref writer, ref value);
-        }
-        public override void Deserialize(ref MemoryPackReader reader, {{scopedRef}} {{TypeName}} value)
-        {
-            {{TypeName}}.Deserialize(ref reader, ref value);
-        }
-    }
-}
-""";
-            writer.AppendLine(code);
-        }
 
         for(int i = 0; i < containingTypeDeclarations.Count; ++i)
         {
@@ -590,7 +554,7 @@ partial {{classOrStructOrRecord}} {{TypeName}}
 """;
     }
 
-    string EmitAdditionalRegisterFormatter(string indent, IGeneratorContext context)
+    string EmitAdditionalRegisterFormatter(string indent)
     {
         var collector = new TypeCollector();
         collector.Visit(this, false);
@@ -598,21 +562,6 @@ partial {{classOrStructOrRecord}} {{TypeName}}
         var types = collector.GetTypes()
             .Select(x => (x, reference.KnownTypes.GetNonDefaultFormatterName(x)))
             .Where(x => x.Item2 != null)
-            .Where(x =>
-            {
-                if (!context.IsNet7OrGreater)
-                {
-                    if (x.Item2!.StartsWith("global::MemoryPack.Formatters.InterfaceReadOnlySetFormatter"))
-                    {
-                        return false;
-                    }
-                    if (x.Item2!.StartsWith("global::MemoryPack.Formatters.PriorityQueueFormatter"))
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            })
             .ToArray();
 
         if (types.Length == 0) return "";
@@ -992,12 +941,8 @@ partial {{classOrStructOrRecord}} {{TypeName}}
             : IsRecord ? "record" : IsValueType ? "struct" : (Symbol.TypeKind == TypeKind.Interface) ? "interface" : "class";
         var nullable = IsValueType ? "" : "?";
 
-        var staticRegisterFormatterMethod = (context.IsNet7OrGreater)
-            ? $"static void IMemoryPackFormatterRegister."
-            : "public static void ";
-        var register = (context.IsNet7OrGreater)
-            ? $"global::MemoryPack.MemoryPackFormatterProvider.Register<{TypeName}>();"
-            : "RegisterFormatter();";
+        var staticRegisterFormatterMethod = "static void IMemoryPackFormatterRegister.";
+        var register = $"global::MemoryPack.MemoryPackFormatterProvider.Register<{TypeName}>();";
         var scopedRef = context.IsCSharp11OrGreater()
             ? "scoped ref"
             : "ref";
@@ -1109,9 +1054,7 @@ partial class {{TypeName}} : MemoryPackFormatter<{{symbolFullQualified}}>
 
 public static class {{initializerName}}
 {
-#if NET5_0_OR_GREATER
     [System.Runtime.CompilerServices.ModuleInitializer]
-#endif
     public static void RegisterFormatter()
     {
 {{registerFormatterCode}}
@@ -1240,7 +1183,7 @@ public static class {{initializerName}}
 """;
     }
 
-    string EmitGenericCollectionTemplate(IGeneratorContext context)
+    string EmitGenericCollectionTemplate()
     {
         var (collectionKind, collectionSymbol) = ParseCollectionKind(Symbol, reference);
         var methodName = collectionKind switch
@@ -1253,12 +1196,8 @@ public static class {{initializerName}}
 
         var typeArgs = string.Join(", ", collectionSymbol!.TypeArguments.Select(x => x.FullyQualifiedToString()));
 
-        var staticRegisterFormatterMethod = (context.IsNet7OrGreater)
-            ? $"static void IMemoryPackFormatterRegister."
-            : "public static void ";
-        var register = (context.IsNet7OrGreater)
-            ? $"global::MemoryPack.MemoryPackFormatterProvider.Register<{TypeName}>();"
-            : "RegisterFormatter();";
+        var staticRegisterFormatterMethod = "static void IMemoryPackFormatterRegister.";
+        var register = $"global::MemoryPack.MemoryPackFormatterProvider.Register<{TypeName}>();";
 
         var code = $$"""
 partial class {{TypeName}} : IMemoryPackFormatterRegister

@@ -15,7 +15,6 @@ public sealed class StringBuilderFormatter : MemoryPackFormatter<StringBuilder>
             return;
         }
 
-#if NET7_0_OR_GREATER
 
         // for performance reason, currently StringBuilder encode as Utf16, however try to write Utf8?
         // if (writer.Options.StringEncoding == StringEncoding.Utf16)
@@ -33,10 +32,6 @@ public sealed class StringBuilderFormatter : MemoryPackFormatter<StringBuilder>
             return;
         }
 
-#else
-        // write as utf16
-        writer.WriteUtf16(value.ToString());
-#endif
     }
 
     public override void Deserialize(ref MemoryPackReader reader, scoped ref StringBuilder? value)

@@ -78,7 +78,6 @@ internal static class TypeHelpers
                         UnmanagedSZArrayElementSize = (int)typeof(Unsafe).GetMethod("SizeOf")!.MakeGenericMethod(elementType!).Invoke(null, null)!;
                     }
                 }
-#if NET7_0_OR_GREATER
                 else
                 {
                     if (typeof(IFixedSizeMemoryPackable).IsAssignableFrom(type))
@@ -91,7 +90,6 @@ internal static class TypeHelpers
                         }
                     }
                 }
-#endif
             }
             catch
             {

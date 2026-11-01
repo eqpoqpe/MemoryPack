@@ -58,7 +58,6 @@ public static partial class MemoryPackFormatterProvider
         }
     }
 
-#if NET7_0_OR_GREATER
 
     public static void Register<T>()
         where T : IMemoryPackFormatterRegister
@@ -66,7 +65,6 @@ public static partial class MemoryPackFormatterProvider
         T.RegisterFormatter();
     }
 
-#endif
 
     public static void RegisterGenericType(Type genericType, Type genericFormatterType)
     {
@@ -337,10 +335,8 @@ public static partial class MemoryPackFormatterProvider
         formatterType = TryCreateGenericFormatterType(type, ImmutableCollectionFormatters);
         if (formatterType != null) goto CREATE;
 
-#if NET8_0_OR_GREATER
         formatterType = TryCreateGenericFormatterType(type, FrozenCollectionFormatters);
         if (formatterType != null) goto CREATE;
-#endif
 
         formatterType = TryCreateGenericFormatterType(type, InterfaceCollectionFormatters);
         if (formatterType != null) goto CREATE;
@@ -412,11 +408,7 @@ internal sealed class ErrorMemoryPackFormatter : IMemoryPackFormatter
     }
 
     public void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, scoped ref object? value)
-#if NET7_0_OR_GREATER
         where TBufferWriter : IBufferWriter<byte>
-#else
-        where TBufferWriter : class, IBufferWriter<byte>
-#endif
     {
         Throw();
     }

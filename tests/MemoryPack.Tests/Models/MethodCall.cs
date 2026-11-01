@@ -96,33 +96,21 @@ public partial class MethodCall
 
     [MemoryPackOnSerializing]
     public static void OnSerializing_M1<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, ref MethodCall? value)
-#if NET7_0_OR_GREATER
         where TBufferWriter : IBufferWriter<byte>
-#else
-        where TBufferWriter : class, IBufferWriter<byte>
-#endif
     {
         Log.Add(nameof(OnSerializing_M1));
     }
 
     [MemoryPackOnSerializing]
     public void OnSerializing_M2<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, ref MethodCall? value)
-#if NET7_0_OR_GREATER
         where TBufferWriter : IBufferWriter<byte>
-#else
-        where TBufferWriter : class, IBufferWriter<byte>
-#endif
     {
         Log.Add(nameof(OnSerializing_M2));
     }
 
     [MemoryPackOnSerialized]
     public static void OnSerialized_M1<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, ref MethodCall? value)
-#if NET7_0_OR_GREATER
         where TBufferWriter : IBufferWriter<byte>
-#else
-        where TBufferWriter : class, IBufferWriter<byte>
-#endif
     {
         Log.Add(nameof(OnSerialized_M1));
     }
@@ -130,11 +118,7 @@ public partial class MethodCall
 
     [MemoryPackOnSerialized]
     public void OnSerialized_M2<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, ref MethodCall? value)
-#if NET7_0_OR_GREATER
         where TBufferWriter : IBufferWriter<byte>
-#else
-        where TBufferWriter : class, IBufferWriter<byte>
-#endif
     {
         Log.Add(nameof(OnSerialized_M2));
     }
